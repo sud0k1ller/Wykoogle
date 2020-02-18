@@ -65,19 +65,29 @@ def ekstrakcja_komentujacych_wpis(surowe_dane_string):
     print("\t\t[+] ZAKOŃCZONO")
     return komentujacy   
 
-def pobierz_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron_do_analizy):
+def pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron_do_analizy):
     
     tablicy_id_wpisow = []
-    print("\tPobieranie ID wpisów użytkownika " + nazwa_uzytkownika + " z " + liczba_stron_do_analizy + " pierwszysch stron...")
+    numer_strony = 1
 
-    print("\\tt[+] ZAKOŃCZONO")
+    print("\n\tPobieranie ID wpisów użytkownika " + nazwa_uzytkownika + " z " + str(liczba_stron_do_analizy) + " pierwszych stron...")
+    
+    print("\tPobieranie " + str(numer_strony) + ". strony...")
+    surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))
+    print("\t\tZAKOŃCZONO")
+   
+    print(surowe_dane_strony.text)
+    
+    print("\t\t[+] ZAKOŃCZONO")
     
 
 
 # ==== MAIN ====
 
-tablica_analizowanych_uzytkownikow = ['A', 'B', 'C']
-tablica_analizowanych_tagow = ['#X', '#Y', '#Z']
+tablica_analizowanych_nielubianych_uzytkownikow = ['A', 'B', 'C']
+tablica_analizowanych_nielubianych_tagow = ['#X', '#Y', '#Z']
+tablica_analizowanych_lubianych_uzytkownikow = ['D', 'E', 'F']
+tablica_analizowanych_lubianych_tagow = ['#T', '#U', '#V']
 
 surowe_dane = plusujacy_wpis_surowe_dane(id_wpisu)
 tablica_plusujacych_wpis = ekstrakcja_plusujacych_z_surowych_danych(surowe_dane)
@@ -90,3 +100,4 @@ print(tablica_plusujacych_wpis)
 print("KOMENTUJĄCY:")
 print(komentujacy)
 
+pobranie_id_wpisow_uzytkownika('MikolajSobczak1985', 1)
