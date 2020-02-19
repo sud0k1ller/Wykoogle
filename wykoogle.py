@@ -67,25 +67,21 @@ def ekstrakcja_komentujacych_wpis(surowe_dane_string):
     return komentujacy   
 
 def pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron_do_analizy):
-    
-    tablicy_id_wpisow = []
+    #TODO
+    #Stworzyć mechanizm, pobierający id wpisów do określonej daty
+    tablica_id_wpisow = []
     numer_strony = 1
 
     print("\n\tPobieranie ID wpisów użytkownika " + nazwa_uzytkownika + " z " + str(liczba_stron_do_analizy) + " pierwszych stron...")
-    
-    print("\tPobieranie " + str(numer_strony) + ". strony...")
-    surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))
-    print("\t\tZAKOŃCZONO")
-     
-    #TODO
-    #Tutaj też trzeba pomyśleć nad czymś sprytnieszym - xpath?
-    #print(surowe_dane_strony.text)
-    temp = re.findall('data-id="(\d*)" data-type="entry"', (surowe_dane_strony.text).replace('\n', ' ')) 
-    id_wpisow = list(dict.fromkeys(temp))
-    #print(temp)
-    print(id_wpisow)
+    for strona in range(numer_strony, liczba_stron_do_analizy+1):
+        surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony)) 
+        #TODO
+        #Tutaj też trzeba pomyśleć nad czymś sprytnieszym - xpath?
+        temp = re.findall('data-id="(\d*)" data-type="entry"', (surowe_dane_strony.text).replace('\n', ' ')) 
+        #Append kolejnych id z wielu stron 
+        tablica_id_wpisow += list(dict.fromkeys(temp))
     print("\t\t[+] ZAKOŃCZONO")
-
+    return tablica_id_wpisow
     
 
 
@@ -95,11 +91,17 @@ tablica_analizowanych_nielubianych_uzytkownikow = ['A', 'B', 'C']
 tablica_analizowanych_nielubianych_tagow = ['#X', '#Y', '#Z']
 tablica_analizowanych_lubianych_uzytkownikow = ['D', 'E', 'F']
 tablica_analizowanych_lubianych_tagow = ['#T', '#U', '#V']
+nazwa_uzytkownika = "MikolajSobczak1985"
+liczba_stron = 2
 
 surowe_dane = plusujacy_wpis_surowe_dane(id_wpisu)
 tablica_plusujacych_wpis = ekstrakcja_plusujacych_z_surowych_danych(surowe_dane)
 surowe_dane = komentujacy_wpis_surowe_dane(id_wpisu)
 komentujacy = ekstrakcja_komentujacych_wpis(surowe_dane)
+id_wpisow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron) 
+
+print("ID WPISÓW " + nazwa_uzytkownika + " z " + str(liczba_stron) + " stron:")
+print(id_wpisow_uzytkownika)
 
 print("PLUSUJĄCY:")
 print(tablica_plusujacych_wpis)
@@ -107,4 +109,4 @@ print(tablica_plusujacych_wpis)
 print("KOMENTUJĄCY:")
 print(komentujacy)
 
-pobranie_id_wpisow_uzytkownika('MikolajSobczak1985', 1)
+
