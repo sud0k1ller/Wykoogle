@@ -55,6 +55,7 @@ def ekstrakcja_komentujacych_wpis(surowe_dane_string):
    
     print("\tEkstrakcja komentujących...") 
     try:
+        #TODO
         #To pod spodem, to jakaś rzeź. Trzeba to zmienić, zanim walnie
         temp = re.findall('id="sub-(.*?)class="grid', (surowe_dane_string.text).replace('\n', ' '))
         temp_1 = re.findall('ludzie/([\w-]*?)/', str(temp))
@@ -75,10 +76,16 @@ def pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron_do_analizy):
     print("\tPobieranie " + str(numer_strony) + ". strony...")
     surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))
     print("\t\tZAKOŃCZONO")
-   
-    print(surowe_dane_strony.text)
-#test_git    
+     
+    #TODO
+    #Tutaj też trzeba pomyśleć nad czymś sprytnieszym - xpath?
+    #print(surowe_dane_strony.text)
+    temp = re.findall('data-id="(\d*)" data-type="entry"', (surowe_dane_strony.text).replace('\n', ' ')) 
+    id_wpisow = list(dict.fromkeys(temp))
+    #print(temp)
+    print(id_wpisow)
     print("\t\t[+] ZAKOŃCZONO")
+
     
 
 
