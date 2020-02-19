@@ -77,7 +77,7 @@ def pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron_do_analizy):
     print("\t\tZAKOŃCZONO")
    
     print(surowe_dane_strony.text)
-    
+#test_git    
     print("\t\t[+] ZAKOŃCZONO")
     
 
