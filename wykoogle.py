@@ -122,7 +122,16 @@ def pobranie_aktywnych_lubiany_uz(nazwa_uzytkownika, liczba_stron):
 liczba_stron = 2
 tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow = pobranie_listy_analizowanych_tagow_i_uzytkownikow()
 
-print(pobranie_aktywnych_lubiany_uz(tablica_lubianych_uzytkownikow[0], 1))
+tablica_mescuda = pobranie_aktywnych_lubiany_uz(tablica_lubianych_uzytkownikow[0], 1)
+tablica_hannahalla = pobranie_aktywnych_lubiany_uz(tablica_lubianych_uzytkownikow[1], 1)
+tablica_anonimowe = pobranie_aktywnych_lubiany_uz(tablica_lubianych_uzytkownikow[2], 1)
+
+result = set(tablica_mescuda).intersection(tablica_hannahalla)
+
+result = set(result).intersection(tablica_anonimowe)
+print(result)
+
+#print(pobranie_aktywnych_lubiany_uz(tablica_lubianych_uzytkownikow[0], 1))
 
 
 
