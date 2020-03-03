@@ -74,8 +74,7 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
-                    print(wpis.find('div').attrs.get('data-id')) 
-                    tablica_id_wpisow += wpis.find('div').attrs.get('data-id')
+                    tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
         except:
             print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
             return -1
@@ -86,9 +85,8 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     if len(argumenty) > 3 or len(argumenty) < 2:
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_uzytkownika'")
         return -1
-   
-        print(tablica_id_wpisow) 
-        return tablica_id_wpisow
+  
+    return tablica_id_wpisow
 
  
 def pobranie_id_wpisow_na_tagu(nazwa_tagu, liczba_stron_do_analizy):
