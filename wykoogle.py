@@ -59,35 +59,36 @@ def pobranie_komentujacych_wpis(id_wpisu):
     return ekstrakcja_komentujacych_wpis(surowe_dane) 
 
 
-def pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron_do_analizy):
-    tablica_id_wpisow = []
-    numer_strony = 1
+def pobranie_id_wpisow_uzytkownika(*argumenty):
     
-    try:
-        for strona in range(numer_strony, liczba_stron_do_analizy+1):
-            surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony)) 
-            
-            soup = bs(surowe_dane_strony.text, "lxml")
-            node = soup.find('ul', {'class': 'itemsStream'})
-            print(list(node.children))
+    nazwa_uzytkownika = argumenty[0]
+    tablica_id_wpisow = []
+      
+    if len(argumenty) == 2:
+        liczba_stron_do_analizy = argumenty[1]
+        numer_strony = 1
 
+        try:
+            for strona in range(numer_strony, liczba_stron_do_analizy+1):
+                surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
+                soup = bs(surowe_dane_strony.text, "lxml")
+                lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+                for wpis in lista_wpisow:
+                    print(wpis.find('div').attrs.get('data-id')) 
+                    tablica_id_wpisow += wpis.find('div').attrs.get('data-id')
+        except:
+            print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
+            return -1
 
-
-            temp = re.findall('data-id="(\d*)" data-type="entry"', (surowe_dane_strony.text).replace('\n', ' ')) 
-            daty = re.findall('<time title=\"(.*?) ', (surowe_dane_strony.text).replace('\n',' '))
-#            print(temp)
-#           print(daty)
-            #TODO
-            #Stworzyć tablicę dat dodania wpisów
-            #Podnieść flagę, jeśli wpis nie mieści się w ramach
-            #Dodać do tablicy wpisów tylko te mieszczące się w podanym zakresie dat
-
-            tablica_id_wpisow += list(dict.fromkeys(temp))
-    except:
-        print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
+    if len(argumenty) == 3:
+        data_poczatkowa = argumenty[1]
+        data_koncowa = argumenty[2]
+    if len(argumenty) > 3 or len(argumenty) < 2:
+        print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_uzytkownika'")
         return -1
-
-    return tablica_id_wpisow
+   
+        print(tablica_id_wpisow) 
+        return tablica_id_wpisow
 
  
 def pobranie_id_wpisow_na_tagu(nazwa_tagu, liczba_stron_do_analizy):
@@ -198,25 +199,23 @@ tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych
 
 wyswietl_informacje_o_pobranych_danych(tablica_lubianych_uzytkownikow, tablica_lubianych_tagow, tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow)
 
-
-
-pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", 2)
-
+#pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", 1)
+#pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", "2020-03-01", "2020-03-02")
 
 # === TO DZIAŁA - TEST ====
 
-#zbior_wspolny = []
-#
-#for uzytkownik in tablica_lubianych_uzytkownikow:
-#    temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik, liczba_stron)
-#    if zbior_wspolny:
-#        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-#    else:
-#        zbior_wspolny = temp_tablica
-#
-#print("\nLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
-#
-#index = 1
-#for uzytkownik in zbior_wspolny:
-#    print("\t" + str(index) + ") " + uzytkownik)
-#    index += 1
+zbior_wspolny = []
+
+for uzytkownik in tablica_lubianych_uzytkownikow:
+    temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik, liczba_stron)
+    if zbior_wspolny:
+        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+    else:
+        zbior_wspolny = temp_tablica
+
+print("\nLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
+
+index = 1
+for uzytkownik in zbior_wspolny:
+    print("\t" + str(index) + ") " + uzytkownik)
+    index += 1
