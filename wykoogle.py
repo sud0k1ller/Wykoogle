@@ -63,10 +63,10 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     
     nazwa_uzytkownika = argumenty[0]
     tablica_id_wpisow = []
-      
+    numer_strony = 1 
+
     if len(argumenty) == 2:
         liczba_stron_do_analizy = argumenty[1]
-        numer_strony = 1
 
         try:
             for strona in range(numer_strony, liczba_stron_do_analizy+1):
@@ -82,6 +82,29 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     if len(argumenty) == 3:
         data_poczatkowa = argumenty[1]
         data_koncowa = argumenty[2]
+        flaga_data_w_zakresie = 0
+        flaga_data_poza_zakresem = 0        
+
+        try:
+            while !flaga_data_poza_zakresem:
+                surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
+                numer_strony += 1
+                soup = bs(surowe_dane_strony.text, "lxml")
+                lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+                for wpis in lista_wpisow:
+                    #POBIERZ DATE
+                    data_wpisu = wpis.find
+                    if !flaga_data_w_zakresie and data_wpisu >= data_poczatkowa: # NA ROBOCZO
+                        flaga_data_w_zakresie = 1
+                    if flaga_data_w_zakresie and data_wpisu > data_koncowa: # NA ROBOCZO
+                        flaga_data_poza_zakresem = 1 
+                        break 
+                    if (flaga_data_w_zakresie):
+                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
+        except:
+            print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
+            return -1
+
     if len(argumenty) > 3 or len(argumenty) < 2:
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_uzytkownika'")
         return -1
