@@ -4,6 +4,7 @@ import re
 import requests
 from lxml import html
 from bs4 import BeautifulSoup as bs
+from datetime import date
 
 def plusujacy_wpis_surowe_dane(id_wpisu):
     try:
@@ -80,28 +81,27 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
             return -1
 
     if len(argumenty) == 3:
-        data_poczatkowa = argumenty[1]
-        data_koncowa = argumenty[2]
+        data_poczatkowa = date.fromisoformat(argumenty[1])
+        data_koncowa = date.fromisoformat(argumenty[2])
         flaga_data_w_zakresie = 0
         flaga_data_poza_zakresem = 0        
 
         try:
-            while 1:#!flaga_data_poza_zakresem:
+            while not flaga_data_poza_zakresem:
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
                 numer_strony += 1
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
-                    pass
-                    #POBIERZ DATE
-                    #data_wpisu = wpis.find
-                    #if !flaga_data_w_zakresie and data_wpisu >= data_poczatkowa: # NA ROBOCZO
-                    #    flaga_data_w_zakresie = 1
-                    #if flaga_data_w_zakresie and data_wpisu > data_koncowa: # NA ROBOCZO
-                    #    flaga_data_poza_zakresem = 1 
-                    #    break 
-                    #if (flaga_data_w_zakresie):
-                    #    tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
+                    data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
+                    print(data_wpisu)
+                    if not flaga_data_w_zakresie and data_wpisu > data_poczatkowa:
+                        flaga_data_w_zakresie = 1
+                    if flaga_data_w_zakresie and data_wpisu > data_koncowa:
+                        flaga_data_poza_zakresem = 1 
+                        break 
+                    if flaga_data_w_zakresie:
+                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
         except:
             print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
             return -1
@@ -222,22 +222,22 @@ tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych
 wyswietl_informacje_o_pobranych_danych(tablica_lubianych_uzytkownikow, tablica_lubianych_tagow, tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow)
 
 #pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", 1)
-#pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", "2020-03-01", "2020-03-02")
+pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", "2020-03-01", "2020-03-02")
 
 # === TO DZIAŁA - TEST ====
 
-zbior_wspolny = []
-
-for uzytkownik in tablica_lubianych_uzytkownikow:
-    temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik, liczba_stron)
-    if zbior_wspolny:
-        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-    else:
-        zbior_wspolny = temp_tablica
-
-print("\nLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
-
-index = 1
-for uzytkownik in zbior_wspolny:
-    print("\t" + str(index) + ") " + uzytkownik)
-    index += 1
+#zbior_wspolny = []
+#
+#for uzytkownik in tablica_lubianych_uzytkownikow:
+#    temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik, liczba_stron)
+#    if zbior_wspolny:
+#        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+#    else:
+#        zbior_wspolny = temp_tablica
+#
+#print("\nLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
+#
+#index = 1
+#for uzytkownik in zbior_wspolny:
+#    print("\t" + str(index) + ") " + uzytkownik)
+#    index += 1
