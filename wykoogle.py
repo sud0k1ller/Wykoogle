@@ -81,8 +81,8 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
             return -1
 
     if len(argumenty) == 3:
-        data_poczatkowa = date.fromisoformat(argumenty[1])
-        data_koncowa = date.fromisoformat(argumenty[2])
+        data_poczatkowa = date.fromisoformat(argumenty[2])
+        data_koncowa = date.fromisoformat(argumenty[1])
         flaga_data_w_zakresie = 0
         flaga_data_poza_zakresem = 0        
 
@@ -95,12 +95,15 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
                 for wpis in lista_wpisow:
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
                     print(data_wpisu)
-                    if not flaga_data_w_zakresie and data_wpisu > data_poczatkowa:
+                    if not flaga_data_w_zakresie and data_wpisu >= data_poczatkowa:
                         flaga_data_w_zakresie = 1
-                    if flaga_data_w_zakresie and data_wpisu > data_koncowa:
+                        print("W ZAKRESIE")
+                    if flaga_data_w_zakresie and data_wpisu < data_koncowa:
                         flaga_data_poza_zakresem = 1 
+                        print("POZA ZAKRESEM")
                         break 
                     if flaga_data_w_zakresie:
+                        print("DODAJĘ ID")
                         tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
         except:
             print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
@@ -109,7 +112,8 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     if len(argumenty) > 3 or len(argumenty) < 2:
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_uzytkownika'")
         return -1
-  
+ 
+    print(tablica_id_wpisow) 
     return tablica_id_wpisow
 
  
