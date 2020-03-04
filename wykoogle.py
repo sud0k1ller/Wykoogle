@@ -251,19 +251,12 @@ def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, ta
     else:
         print("\nNie wybrano nielubianych tagów\n")
 
-def dodaj_domyslne_zakresy(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
-    
-    
-
-    return tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow 
 
 #===== MAIN =====
 # Pobierz informacje z plików
 tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow = pobranie_listy_analizowanych_tagow_i_uzytkownikow()
 # Wyświetl pobrane informacje oraz wskaż błędy
 wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow)
-# Dodaj domyślne zakresy dat lub stron
-tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow = dodaj_domyslne_zakresy(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow)
 
 # Rozpocznij poszukiwanie elementow wspolnych
 # === TO DZIAŁA - TEST ====
