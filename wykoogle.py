@@ -61,17 +61,15 @@ def pobranie_komentujacych_wpis(id_wpisu):
 
 
 def pobranie_id_wpisow_uzytkownika(*argumenty):
-    
     nazwa_uzytkownika = argumenty[0]
     tablica_id_wpisow = []
     numer_strony = 1 
 
     if len(argumenty) == 2:
         liczba_stron_do_analizy = argumenty[1]
-
         try:
-            for strona in range(numer_strony, liczba_stron_do_analizy+1):
-                surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
+            for strona in range(numer_strony, liczba_stron_do_analizy + 1):
+                surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(strona))  
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
@@ -109,7 +107,6 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_uzytkownika'")
         return -1
  
-    print(tablica_id_wpisow) 
     return tablica_id_wpisow
 
  
@@ -151,56 +148,110 @@ def pobranie_listy_analizowanych_tagow_i_uzytkownikow():
     return nielubiani_uz_lista, nielubiane_tagi_lista, lubiani_uz_lista, lubiane_tagi_lista   
 
 
-def pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron):
+def pobranie_komentujacych_uzytkownika(*argumenty):
     lista_id_postow_uzytkownika = []
     lista_komentujacych_uzytkownika = []
+    nazwa_uzytkownika = argumenty[0]
+    
+    if len(argumenty) == 2 or len(argumenty) == 1:
+        if len(argumenty) == 1:
+            liczba_stron = 1
+        else:
+            liczba_stron = int(argumenty[1])   
+        try:
+            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            for id_wpisu in lista_id_postow_uzytkownika:
+                lista_komentujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
+        except:
+            print("\t\t[!] Błąd pobrania komentujących wpisy użytkownika!")
+            return -1
 
-    try:
-        lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
-        for id_wpisu in lista_id_postow_uzytkownika:
-            lista_komentujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
-    except:
-        print("\t\t[!] Błąd pobrania komentujących wpisy użytkownika!")
-        return -1
-
+    if len(argumenty) == 3:
+        data_poczatkowa = argumenty[1]
+        data_koncowa = argumenty[2]
+        try:
+            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            for id_wpisu in lista_id_postow_uzytkownika:
+                lista_komentujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
+        except:
+            print("\t\t[!] Błąd pobrania komentujących wpisy użytkownika!")
+            return -1
+    
     return lista_komentujacych_uzytkownika
 
 
-def pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, liczba_stron):
+def pobranie_plusujacych_uzytkownika(*argumenty):
     lista_id_postow_uzytkownika = []
     lista_plusujacych_uzytkownika = []
-    
-    try:
-        lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
-        for id_wpisu in lista_id_postow_uzytkownika:
-            lista_plusujacych_uzytkownika += pobranie_plusujacych_wpis(id_wpisu)
-    except:
-        print("\t\t[!] Błąd pobrania plusujących wpisy użytkownika!")
-        return -1
+    nazwa_uzytkownika = argumenty[0]
+   
+    if len(argumenty) == 2 or len(argumenty) == 1:
+        if len(argumenty) == 1:
+            liczba_stron = 1
+        else:
+            liczba_stron = int(argument[1])
+        try:
+            print("WESZŁO")
+            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            for id_wpisu in lista_id_postow_uzytkownika:
+                lista_plusujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
+        except:
+            print("\t\t[!] Błąd pobrania komentujących wpisy użytkownika!")
+            return -1
+
+    if len(argumenty) == 3:
+        data_poczatkowa = argumenty[1]
+        data_koncowa = argumenty[2]
+        try:
+            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            for id_wpisu in lista_id_postow_uzytkownika:
+                lista_plusujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
+        except:
+            print("\t\t[!] Błąd pobrania komentujących wpisy użytkownika!")
+            return -1
     
     return lista_plusujacych_uzytkownika
 
 
-def pobranie_aktywnych_lubiany_uz(nazwa_uzytkownika, liczba_stron):
+def pobranie_aktywnych_lubiany_uz(*argumenty):
     lista_wszystkich_plusujacych = []
     lista_wszystkich_komentujacych = []
+    nazwa_uzytkownika = argumenty[0]
 
-    print("Pobieranie informacji o lubianym użytkowniku " + nazwa_uzytkownika + "...\t\t", end=' ')
-    try:
-        lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)
-        lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)   
-        wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
-        wszyscy_aktywni.remove(nazwa_uzytkownika)
-    except:
-        print("\t\t[!] Błąd pobrania aktywnych pod wpisami użytkownika (plusujących i komentujących)!")
-        return -1
+    print("\nPobieranie informacji o lubianym użytkowniku " + nazwa_uzytkownika + "...\t\t", end=' ')
+    if len(argumenty) == 2 or len(argumenty) == 1:
+        if len(argumenty) == 1:
+            liczba_stron = 1
+        else:
+            liczba_stron = int(argumenty[1])
+        try:
+            print("1")
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            print("2")
+            lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)   
+            print("3")
+            wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
+            wszyscy_aktywni.remove(nazwa_uzytkownika)
+        except:
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami użytkownika (plusujących i komentujących)!")
+            return -1
+
+    if len(argumenty) == 3:
+        data_poczatkowa = argumenty[1]
+        data_koncowa = argumenty[2]
+        try:    
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)   
+            wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
+            wszyscy_aktywni.remove(nazwa_uzytkownika)
+        except:
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami użytkownika (plusujących i komentujących)!")
+            return -1
 
     print("[+] ZAKOŃCZONO")
     return wszyscy_aktywni
 
 
-#TODO
-#Dostosowac do zmiany struktury pliku wejsciowego
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
  
     if len(tablica_lubianych_uzytkownikow):
@@ -215,7 +266,7 @@ def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, ta
     else:
         print("\nNie wybrano lubianych użytkowników")
 
-    if len(tablica_lubianych_tagow): #TODO Obsługa domyślnego zakresu
+    if len(tablica_lubianych_tagow):
         print("\nWybrano " + str(len(tablica_lubianych_tagow)) + " lubianych tagów:")
         for tag in tablica_lubianych_tagow:
             if len(tag.split()) == 1:
@@ -261,19 +312,23 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 # Rozpocznij poszukiwanie elementow wspolnych
 # === TO DZIAŁA - TEST ====
 
-#zbior_wspolny = []
-#
-#for uzytkownik in tablica_lubianych_uzytkownikow:
-#    temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik, liczba_stron)
-#    if zbior_wspolny:
-#        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-#    else:
-#        zbior_wspolny = temp_tablica
-#
-# Zwróć listę uzytkownikow
-#print("\nLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
-#
-#index = 1
-#for uzytkownik in zbior_wspolny:
-#    print("\t" + str(index) + ") " + uzytkownik)
-#    index += 1
+zbior_wspolny = []
+
+for uzytkownik in tablica_lubianych_uzytkownikow:
+    if len(uzytkownik.split()) == 1:
+        temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0])
+    if len(uzytkownik.split()) == 2:
+        temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
+    if len(uzytkownik.split()) == 3:
+        temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
+    if zbior_wspolny:
+        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+    else:
+        zbior_wspolny = temp_tablica
+
+print("\nLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
+
+index = 1
+for uzytkownik in zbior_wspolny:
+    print("\t" + str(index) + ") " + uzytkownik)
+    index += 1
