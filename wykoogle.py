@@ -94,16 +94,12 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
-                    print(data_wpisu)
                     if not flaga_data_w_zakresie and data_wpisu >= data_poczatkowa:
                         flaga_data_w_zakresie = 1
-                        print("W ZAKRESIE")
                     if flaga_data_w_zakresie and data_wpisu < data_koncowa:
                         flaga_data_poza_zakresem = 1 
-                        print("POZA ZAKRESEM")
                         break 
                     if flaga_data_w_zakresie:
-                        print("DODAJĘ ID")
                         tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
         except:
             print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
@@ -134,12 +130,26 @@ def pobranie_id_wpisow_na_tagu(nazwa_tagu, liczba_stron_do_analizy):
 
  
 def pobranie_listy_analizowanych_tagow_i_uzytkownikow():
-    
+    nielubiani_uz_lista = []
+    nielubiane_tagi_lista = []
+    lubiani_uz_lista = []
+    lubiane_tagi_lista = []
+
     try:
-        return [nielubiany_uz.rstrip('\n') for nielubiany_uz in  open('nielubiani_uzytkownicy', 'r')], [nielubiany_tag.rstrip('\n') for nielubiany_tag in  open('nielubiane_tagi', 'r')], [lubiany_uz.rstrip('\n') for lubiany_uz in  open('lubiani_uzytkownicy', 'r')], [lubiany_tag.rstrip('\n') for lubiany_tag in  open('lubiane_tagi', 'r')]   
+        for nielubiany_uz in open('nielubiani_uzytkownicy', 'r'):
+            nielubiani_uz_lista.append(nielubiany_uz.strip())
+        for nielubiany_tag in open('nielubiane_tagi', 'r'):
+            nielubiane_tagi_lista.append(nielubiany_tag.strip())
+        for lubiany_uz in open('lubiani_uzytkownicy', 'r'):
+            lubiani_uz_lista.append(lubiany_uz.strip())
+        for lubiany_tag in open('lubiane_tagi', 'r'):
+            lubiane_tagi_lista.append(lubiany_tag.strip())
     except:
         print("\t\t[!] Błąd pobrania listy analizowanych użytkowników i tagów z plików!")
         return -1
+
+    return nielubiani_uz_lista, nielubiane_tagi_lista, lubiani_uz_lista, lubiane_tagi_lista   
+
 
 def pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron):
     lista_id_postow_uzytkownika = []
@@ -188,45 +198,64 @@ def pobranie_aktywnych_lubiany_uz(nazwa_uzytkownika, liczba_stron):
     print("[+] ZAKOŃCZONO")
     return wszyscy_aktywni
 
-def wyswietl_informacje_o_pobranych_danych(tablica_lubianych_uzytkownikow, tablica_lubianych_tagow, tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow):
-   
+
+#TODO
+#Dostosowac do zmiany struktury pliku wejsciowego
+def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
+ 
     if len(tablica_lubianych_uzytkownikow):
         print("\nWybrano " + str(len(tablica_lubianych_uzytkownikow)) + " lubianych użytkowników:")
         for uzytkownik in tablica_lubianych_uzytkownikow:
-            print("\t" + uzytkownik)
+            if len(uzytkownik.split()) == 1:
+                print("\t" + uzytkownik.split()[0] + "\tNie wybrano zakresu dat lub liczby stron do analizy. Domyślnie sprawdzane są wpisy z ostatniej strony")
+            if len(uzytkownik.split()) == 2:
+                print("\t" + uzytkownik.split()[0] + "\tSprawdzane posty z " + uzytkownik.split()[1] + " ostatnich stron wpisów użytkownika")
+            if len(uzytkownik.split()) == 3:
+                print("\t" + uzytkownik.split()[0] + "\tSprawdzane posty od " + uzytkownik.split()[1] + " do " + uzytkownik.split()[2]) 
     else:
         print("\nNie wybrano lubianych użytkowników")
 
-    if len(tablica_lubianych_tagow):
-        print("Wybrano " + str(len(tablica_lubianych_tagow)) + " lubianych tagów:")
+    if len(tablica_lubianych_tagow): #TODO Obsługa domyślnego zakresu
+        print("\nWybrano " + str(len(tablica_lubianych_tagow)) + " lubianych tagów:")
         for tag in tablica_lubianych_tagow:
-            print("\t" + tag)
+            if len(tag.split()) == 1:
+                print("\t" + tag.split()[0] + "\tNie wybrano zakresu dat do analizy. Domyślnie sprawdzane są wpisy z ostatniego tygodnia")
+            if len(tag.split()) == 2:
+                print("\t" + tag.split()[0] + "\tZakres dat źle określony. Zostanie zbadany domyślny okres ostatniego tygodnia")
+            if len(tag.split()) == 3:
+                print("\t" + tag.split()[0] + "\tSprawdzane posty od " + tag.split()[1] + " do " + tag.split()[2]) 
     else:
         print("\nNie wybrano lubianych tagów")
 
     if len(tablica_nielubianych_uzytkownikow):
-        print("Wybrano " + str(len(tablica_nielubianych_uzytkownikow)) + " nielubianych użytkowników:")
-        for uzytkownik in tablica_lubianych_uzytkownikow:
-            print("\t" + uzytkownik)
+        print("\nWybrano " + str(len(tablica_nielubianych_uzytkownikow)) + " nielubianych użytkowników:")
+        for uzytkownik in tablica_nielubianych_uzytkownikow:
+            if len(uzytkownik.split()) == 1:
+                print("\t" + uzytkownik.split()[0] + "\tNie wybrano zakresu dat lub liczby stron do analizy. Domyślnie sprawdzane są wpisy z ostatniej strony")
+            if len(uzytkownik.split()) == 2:
+                print("\t" + uzytkownik.split()[0] + "\tSprawdzane posty z " + uzytkownik.split()[1] + " ostatnich stron wpisów użytkownika")
+            if len(uzytkownik.split()) == 3:
+                print("\t" + uzytkownik.split()[0] + "\tSprawdzane posty od " + uzytkownik.split()[1] + " do " + uzytkownik.split()[2]) 
     else:
         print("\nNie wybrano nielubianych użytkowników")
 
     if len(tablica_nielubianych_tagow):
-        print("Wybrano " + str(len(tablica_nielubianych_tagow)) + " nielubianych tagów:")
-        for uzytkownik in tablica_lubianych_uzytkownikow:
-            print("\t" + uzytkownik)
+        print("\nWybrano " + str(len(tablica_nielubianych_tagow)) + " nielubianych tagów:")
+        for tag in tablica_nielubianych_tagow:
+            if len(tag.split()) == 1:
+                print("\t" + tag.split()[0] + "\tNie wybrano zakresu dat do analizy. Domyślnie sprawdzane są wpisy z ostatniego tygodnia")
+            if len(tag.split()) == 2:
+                print("\t" + tag.split()[0] + "\tZakres dat źle określony. Zostanie zbadany domyślny okres ostatniego tygodnia")
+            if len(tag.split()) == 3:
+                print("\t" + tag.split()[0] + "\tSprawdzane posty od " + tag.split()[1] + " do " + tag.split()[2]) 
     else:
         print("\nNie wybrano nielubianych tagów\n")
 
 
 #===== MAIN =====
-liczba_stron = 2
 tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow = pobranie_listy_analizowanych_tagow_i_uzytkownikow()
+wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow)
 
-wyswietl_informacje_o_pobranych_danych(tablica_lubianych_uzytkownikow, tablica_lubianych_tagow, tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow)
-
-#pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", 1)
-pobranie_id_wpisow_uzytkownika("MikolajSobczak1985", "2020-03-01", "2020-03-02")
 
 # === TO DZIAŁA - TEST ====
 
