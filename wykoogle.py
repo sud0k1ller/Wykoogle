@@ -86,21 +86,22 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
         flaga_data_poza_zakresem = 0        
 
         try:
-            while !flaga_data_poza_zakresem:
+            while 1:#!flaga_data_poza_zakresem:
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
                 numer_strony += 1
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
+                    pass
                     #POBIERZ DATE
-                    data_wpisu = wpis.find
-                    if !flaga_data_w_zakresie and data_wpisu >= data_poczatkowa: # NA ROBOCZO
-                        flaga_data_w_zakresie = 1
-                    if flaga_data_w_zakresie and data_wpisu > data_koncowa: # NA ROBOCZO
-                        flaga_data_poza_zakresem = 1 
-                        break 
-                    if (flaga_data_w_zakresie):
-                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
+                    #data_wpisu = wpis.find
+                    #if !flaga_data_w_zakresie and data_wpisu >= data_poczatkowa: # NA ROBOCZO
+                    #    flaga_data_w_zakresie = 1
+                    #if flaga_data_w_zakresie and data_wpisu > data_koncowa: # NA ROBOCZO
+                    #    flaga_data_poza_zakresem = 1 
+                    #    break 
+                    #if (flaga_data_w_zakresie):
+                    #    tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
         except:
             print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
             return -1
