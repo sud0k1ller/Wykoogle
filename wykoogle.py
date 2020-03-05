@@ -65,8 +65,12 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     tablica_id_wpisow = []
     numer_strony = 1 
 
-    if len(argumenty) == 2:
-        liczba_stron_do_analizy = argumenty[1]
+    if len(argumenty) == 2 or len(argumenty) == 1:
+        if len(argumenty) == 1:
+            liczba_stron_do_analizy = 1
+        else:
+            liczba_stron_do_analizy = int(argumenty[1])
+        
         try:
             for strona in range(numer_strony, liczba_stron_do_analizy + 1):
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(strona))  
@@ -79,11 +83,10 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
             return -1
 
     if len(argumenty) == 3:
-        data_poczatkowa = date.fromisoformat(argumenty[2])
-        data_koncowa = date.fromisoformat(argumenty[1])
+        data_poczatkowa = date.fromisoformat(argumenty[1])
+        data_koncowa = date.fromisoformat(argumenty[2])
         flaga_data_w_zakresie = 0
         flaga_data_poza_zakresem = 0        
-
         try:
             while not flaga_data_poza_zakresem:
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
@@ -92,21 +95,21 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
-                    if not flaga_data_w_zakresie and data_wpisu >= data_poczatkowa:
+                    if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
                         flaga_data_w_zakresie = 1
-                    if flaga_data_w_zakresie and data_wpisu < data_koncowa:
-                        flaga_data_poza_zakresem = 1 
-                        break 
                     if flaga_data_w_zakresie:
                         tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
+                    if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
+                        flaga_data_poza_zakresem = 1 
+                        break 
         except:
             print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
             return -1
 
-    if len(argumenty) > 3 or len(argumenty) < 2:
+    if len(argumenty) > 3:
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_uzytkownika'")
         return -1
- 
+
     return tablica_id_wpisow
 
  
@@ -189,9 +192,8 @@ def pobranie_plusujacych_uzytkownika(*argumenty):
         if len(argumenty) == 1:
             liczba_stron = 1
         else:
-            liczba_stron = int(argument[1])
+            liczba_stron = int(argumenty[1])
         try:
-            print("WESZŁO")
             lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
             for id_wpisu in lista_id_postow_uzytkownika:
                 lista_plusujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
@@ -209,7 +211,6 @@ def pobranie_plusujacych_uzytkownika(*argumenty):
         except:
             print("\t\t[!] Błąd pobrania komentujących wpisy użytkownika!")
             return -1
-    
     return lista_plusujacych_uzytkownika
 
 
@@ -225,11 +226,8 @@ def pobranie_aktywnych_lubiany_uz(*argumenty):
         else:
             liczba_stron = int(argumenty[1])
         try:
-            print("1")
             lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)
-            print("2")
             lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)   
-            print("3")
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
             wszyscy_aktywni.remove(nazwa_uzytkownika)
         except:
