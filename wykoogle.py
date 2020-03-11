@@ -231,7 +231,7 @@ def pobranie_aktywnych_lubiany_uz(*argumenty):
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
             wszyscy_aktywni.remove(nazwa_uzytkownika)
         except:
-            print("\t\t[!] Błąd pobrania aktywnych pod wpisami użytkownika (plusujących i komentujących)!")
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami lubianego użytkownika (plusujących i komentujących)!")
             return -1
 
     if len(argumenty) == 3:
@@ -243,12 +243,45 @@ def pobranie_aktywnych_lubiany_uz(*argumenty):
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
             wszyscy_aktywni.remove(nazwa_uzytkownika)
         except:
-            print("\t\t[!] Błąd pobrania aktywnych pod wpisami użytkownika (plusujących i komentujących)!")
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami lubianego użytkownika (plusujących i komentujących)!")
             return -1
 
     print("[+] ZAKOŃCZONO")
     return wszyscy_aktywni
 
+
+def pobranie_aktywnych_nielubiany_uz(*argumenty):
+    lista_wszystkich_plusujacych = []
+    nazwa_uzytkownika = argumenty[0]
+
+    print("\nPobieranie informacji o nielubianym użytkowniku " + nazwa_uzytkownika + "...\t\t", end=' ')
+    if len(argumenty) == 2 or len(argumenty) == 1:
+        if len(argumenty) == 1:
+            liczba_stron = 1
+        else:
+            liczba_stron = int(argumenty[1])
+        try:
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
+            wszyscy_aktywni.remove(nazwa_uzytkownika)
+        except:
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami nielubianego użytkownika (komentujących)!")
+            return -1
+
+    if len(argumenty) == 3:
+        data_poczatkowa = argumenty[1]
+        data_koncowa = argumenty[2]
+        try:    
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
+            wszyscy_aktywni.remove(nazwa_uzytkownika)
+        except:
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami nielubianego użytkownika (komentujących)!")
+            return -1
+
+    print("[+] ZAKOŃCZONO")
+    return wszyscy_aktywni
+   
 
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
  
@@ -311,6 +344,8 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 # === TO DZIAŁA - TEST ====
 
 zbior_wspolny = []
+flaga_zbior_wspolny_pusty_na_poczatku = 1
+
 
 for uzytkownik in tablica_lubianych_uzytkownikow:
     if len(uzytkownik.split()) == 1:
@@ -321,10 +356,34 @@ for uzytkownik in tablica_lubianych_uzytkownikow:
         temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
     if zbior_wspolny:
         zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-    else:
+    if not zbior_wspolny and flaga_zbior_wspolny_pusty_na_poczatku:
         zbior_wspolny = temp_tablica
+        flaga_zbior_wspolny_pusty_na_poczatku = 0
+    if not zbior_wspolny and not flaga_zbior_wspolny_pusty_na_poczatku:
+        print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach")
+        break
 
-print("\nLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
+if zbior_wspolny:
+    print("\n\tUżytkownicy, którzy udzielali się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach:")
+    index = 1
+    for uzytkownik in zbior_wspolny:
+        print("\t\t" + str(index) + ") " + uzytkownik)
+        index += 1
+
+for uzytkownik in tablica_nielubianych_uzytkownikow:
+    if len(uzytkownik.split()) == 1:
+        temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0])
+    if len(uzytkownik.split()) == 2:
+        temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
+    if len(uzytkownik.split()) == 3:
+        temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
+    if zbior_wspolny:
+        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+    else:
+        print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH użytkowników w określonych okresach")
+        break
+
+print("\n\tLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
 
 index = 1
 for uzytkownik in zbior_wspolny:
