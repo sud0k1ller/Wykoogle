@@ -113,18 +113,23 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     return tablica_id_wpisow
 
  
-def pobranie_id_wpisow_na_tagu(nazwa_tagu, liczba_stron_do_analizy):
+def pobranie_id_wpisow_na_tagu(*argumenty):
     tablica_id_wpisow = []
-    numer_strony = 1
+    nazwa_tagu = argumenty[0]    
 
-    try:
-        for strona in range(numer_strony, liczba_stron_do_analizy+1):
-            surowe_dane_strony = requests.get("https://wykop.pl/tag/" + nazwa_uzytkownika + "/strona/" + str(numer_strony)) 
-            temp = re.findall('data-id="(\d*)" data-type="entry"', (surowe_dane_strony.text).replace('\n', ' ')) 
-            tablica_id_wpisow += list(dict.fromkeys(temp))
-    except:
-        print("\t\t[!] Błąd pobranie id wpisow na tagu!")
+    if len(argumenty) == 1:
+        #data_poczatkowa = date.
+        #data_koncowa = date  - 7dni    
+
+    if len(argumenty) == 3:
+        data_poczatkowa = date.fromisoformat(argumenty[1])
+        data_koncowa = date.fromisoformat(argumenty[2])
+    if len(argumenty) == 2 or len(argumenty) > 3:
+        print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_na_tagu'")
         return -1
+
+    flaga_data_w_zakresie = 0
+    flaga_data_poza_zakresem = 0
 
     return tablica_id_wpisow
 
@@ -282,6 +287,26 @@ def pobranie_aktywnych_nielubiany_uz(*argumenty):
     print("[+] ZAKOŃCZONO")
     return wszyscy_aktywni
    
+
+def pobranie_aktywnych_lubiany_tagi(*argumenty):
+    lista_wszystkich_komentujacych = []
+    lista_wszystkich_plusujacych = []
+    nazwa_tagu = argumenty[0]
+
+    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu = "...\t\t", end='')
+
+    pass
+
+
+def pobranie_aktywnych_nielubianych_tag(*argumenty):
+    lista_wszystkich_komentujacych = []
+    nazwa_tagu = argumenty[0]
+
+    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu = "...\t\t", end='')
+
+
+    pass
+
 
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
  
