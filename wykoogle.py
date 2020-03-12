@@ -4,7 +4,7 @@ import re
 import requests
 from lxml import html
 from bs4 import BeautifulSoup as bs
-from datetime import date
+import datetime
 
 def plusujacy_wpis_surowe_dane(id_wpisu):
     try:
@@ -118,9 +118,9 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
     nazwa_tagu = argumenty[0]    
 
     if len(argumenty) == 1:
-        #data_poczatkowa = date.
-        #data_koncowa = date  - 7dni    
-
+        data_koncowa = datetime.date.today()
+        data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+    
     if len(argumenty) == 3:
         data_poczatkowa = date.fromisoformat(argumenty[1])
         data_koncowa = date.fromisoformat(argumenty[2])
@@ -335,20 +335,15 @@ def pobranie_aktywnych_lubiany_tagi(*argumenty):
     lista_wszystkich_komentujacych = []
     lista_wszystkich_plusujacych = []
     nazwa_tagu = argumenty[0]
-
-    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu = "...\t\t", end='')
-
-    pass
+    
+    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu + "...\t\t", end='')
 
 
 def pobranie_aktywnych_nielubianych_tag(*argumenty):
     lista_wszystkich_komentujacych = []
     nazwa_tagu = argumenty[0]
 
-    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu = "...\t\t", end='')
-
-
-    pass
+    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu + "...\t\t", end='')
 
 
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
@@ -411,10 +406,14 @@ tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych
 wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow)
 
 # Wybierz zbiór wspólny dla lubianych użytkowników
-zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
+#zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
 
 # Zmodyfikuj zbiór wspólny uwzględniając nielubianych użytkowników
-zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
+#zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
+
+##
+pobranie_id_wpisow_na_tagu("#kolanowirus")
+##
 
 # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
 # TODO
