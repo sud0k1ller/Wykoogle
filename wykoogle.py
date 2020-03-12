@@ -116,10 +116,26 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
 def pobranie_id_wpisow_na_tagu(*argumenty):
     tablica_id_wpisow = []
     nazwa_tagu = argumenty[0]    
+    flaga_data_w_zakresie = 0
+    flaga_data_poza_zakresem = 0
 
     if len(argumenty) == 1:
-        data_koncowa = datetime.date.today()
-        data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+        try:
+            data_koncowa = datetime.date.today()
+            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+            print("Data początkowa: " + str(data_poczatkowa))
+            print("Data końcowa: " + str(data_koncowa))
+            #while not flaga_data_poza_zakresem:    
+            surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/kolanowirus")# + nazwa_tagu)
+            soup = bs(surowe_dane_strony.text, "lxml")
+            print(soup)
+            lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+            print(len(lista_wpisow))
+                
+        
+        except:
+            print("\t\t[!] Błąd pobrania id wpisów pod tagiem!")
+            return -1
     
     if len(argumenty) == 3:
         data_poczatkowa = date.fromisoformat(argumenty[1])
@@ -412,7 +428,7 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 #zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
 
 ##
-pobranie_id_wpisow_na_tagu("#kolanowirus")
+pobranie_id_wpisow_na_tagu("kolanowirus")
 ##
 
 # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
