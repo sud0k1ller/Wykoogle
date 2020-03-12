@@ -312,11 +312,11 @@ def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspol
 
     for uzytkownik in tablica_nielubianych_uzytkownikow:
         if len(uzytkownik.split()) == 1:
-            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0])
+            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0])
         if len(uzytkownik.split()) == 2:
-            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
+            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
         if len(uzytkownik.split()) == 3:
-            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
+            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
         if zbior_wspolny:
             zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
         if not zbior_wspolny :
