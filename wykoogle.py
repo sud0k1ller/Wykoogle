@@ -286,7 +286,50 @@ def pobranie_aktywnych_nielubiany_uz(*argumenty):
 
     print("[+] ZAKOŃCZONO")
     return wszyscy_aktywni
+
    
+def zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow):
+    flaga_zbior_wspolny_pusty_na_poczatku = 1
+    zbior_wspolny = []
+    temp_tablica = []
+
+    for uzytkownik in tablica_lubianych_uzytkownikow:
+        if len(uzytkownik.split()) == 1:
+            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0])
+        if len(uzytkownik.split()) == 2:
+            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
+        if len(uzytkownik.split()) == 3:
+            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
+        if zbior_wspolny:
+            zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+        if not zbior_wspolny and flaga_zbior_wspolny_pusty_na_poczatku:
+            zbior_wspolny = temp_tablica
+            flaga_zbior_wspolny_pusty_na_poczatku = 0
+        if not zbior_wspolny and not flaga_zbior_wspolny_pusty_na_poczatku:
+            print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach")
+            return -1
+    
+    return zbior_wspolny    
+
+
+def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny):
+    temp_tablica = []
+
+    for uzytkownik in tablica_nielubianych_uzytkownikow:
+        if len(uzytkownik.split()) == 1:
+            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0])
+        if len(uzytkownik.split()) == 2:
+            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
+        if len(uzytkownik.split()) == 3:
+            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
+        if zbior_wspolny:
+            zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+        if not zbior_wspolny :
+            print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH użytkowników w określonych okresach")
+            return -1
+    
+    return zbior_wspolny    
+
 
 def pobranie_aktywnych_lubiany_tagi(*argumenty):
     lista_wszystkich_komentujacych = []
@@ -360,57 +403,25 @@ def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, ta
 
 
 #===== MAIN =====
+
 # Pobierz informacje z plików
 tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow = pobranie_listy_analizowanych_tagow_i_uzytkownikow()
+
 # Wyświetl pobrane informacje oraz wskaż błędy
 wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow)
 
-# Rozpocznij poszukiwanie elementow wspolnych
-# === TO DZIAŁA - TEST ====
+# Wybierz zbiór wspólny dla lubianych użytkowników
+zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
 
-zbior_wspolny = []
-flaga_zbior_wspolny_pusty_na_poczatku = 1
+# Zmodyfikuj zbiór wspólny uwzględniając nielubianych użytkowników
+zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
 
+# Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
+# TODO
 
-for uzytkownik in tablica_lubianych_uzytkownikow:
-    if len(uzytkownik.split()) == 1:
-        temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0])
-    if len(uzytkownik.split()) == 2:
-        temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
-    if len(uzytkownik.split()) == 3:
-        temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
-    if zbior_wspolny:
-        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-    if not zbior_wspolny and flaga_zbior_wspolny_pusty_na_poczatku:
-        zbior_wspolny = temp_tablica
-        flaga_zbior_wspolny_pusty_na_poczatku = 0
-    if not zbior_wspolny and not flaga_zbior_wspolny_pusty_na_poczatku:
-        print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach")
-        break
+# Zmodyfikuj zbiór wspólny uwzględniając nielubianye tagów
+# TODO
 
-if zbior_wspolny:
-    print("\n\tUżytkownicy, którzy udzielali się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach:")
-    index = 1
-    for uzytkownik in zbior_wspolny:
-        print("\t\t" + str(index) + ") " + uzytkownik)
-        index += 1
+# Wyświetl informacje o otrzymanym zbiorze wspólnym
+# TODO
 
-for uzytkownik in tablica_nielubianych_uzytkownikow:
-    if len(uzytkownik.split()) == 1:
-        temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0])
-    if len(uzytkownik.split()) == 2:
-        temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
-    if len(uzytkownik.split()) == 3:
-        temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
-    if zbior_wspolny:
-        zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-    else:
-        print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH użytkowników w określonych okresach")
-        break
-
-print("\n\tLista użytkowników udzielająca się pod wszystkimi wskazanymi tagami/wpisami użytkowników:")
-
-index = 1
-for uzytkownik in zbior_wspolny:
-    print("\t" + str(index) + ") " + uzytkownik)
-    index += 1
