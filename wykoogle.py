@@ -45,10 +45,14 @@ def komentujacy_wpis_surowe_dane(id_wpisu):
 
 
 def ekstrakcja_komentujacych_wpis(surowe_dane_string):
+    komentujacy = []
     try:
-        temp = re.findall('id="sub-(.*?)class="grid', (surowe_dane_string.text).replace('\n', ' '))
-        temp_1 = re.findall('ludzie/([\w-]*?)/', str(temp))
-        komentujacy = list(dict.fromkeys(temp_1))
+        soup = bs(surowe_dane_string.text, "lxml")
+        lista_komentujacych = soup.find_all('div', {'class': 'wblock lcontrast dC'}, {'data-type':'entrycomment'})
+        lista_komentujacych += soup.find_all('div', {'class': 'wblock lcontrast dC deleted'}, {'data-type':'entrycomment'})
+        for komentujacy_uzytkownik in lista_komentujacych:
+            komentujacy.append(komentujacy_uzytkownik.find('a', {'class':'profile'}).attrs.get('href').split('/')[4]) 
+        komentujacy = list(dict.fromkeys(komentujacy))
     except:
         print("\t\t[!] Błąd ekstrakcji komentujących!")
         return -1    
@@ -94,6 +98,8 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
                 numer_strony += 1
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+                if not len(lista_wpisow):
+                    return tablica_id_wpisow
                 for wpis in lista_wpisow:
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
@@ -120,16 +126,24 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
     flaga_data_w_zakresie = 0
     flaga_data_poza_zakresem = 0
 
-    if len(argumenty) == 1:
+    if len(argumenty) == 1 or len(argumenty) == 3:
         try:
-            data_koncowa = datetime.date.today()
-            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+            if len(argumenty) == 1:
+                data_koncowa = datetime.date.today()
+                data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+            else:
+                data_poczatkowa = date.fromisoformat(argumenty[1])
+                data_koncowa = date.fromisoformat(argumenty[2])
+ 
             surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu)
             while not flaga_data_poza_zakresem:    
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+                if not len(lista_wpisow):
+                    return tablica_id_wpisow
                 for wpis in lista_wpisow:
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
+                    print(data_wpisu)
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
                         flaga_data_w_zakresie = 1
                     if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
@@ -145,32 +159,7 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
             print("\t\t[!] Błąd pobrania id wpisów pod tagiem!")
             return -1
     
-    if len(argumenty) == 3:
-        try:
-            data_poczatkowa = date.fromisoformat(argumenty[1])
-            data_koncowa = date.fromisoformat(argumenty[2])
-            surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu)
-            while not flaga_data_poza_zakresem:    
-                soup = bs(surowe_dane_strony.text, "lxml")
-                lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
-                for wpis in lista_wpisow:
-                    data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
-                    if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
-                        flaga_data_w_zakresie = 1
-                    if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
-                        flaga_data_w_zakresie = 0
-                        flaga_data_poza_zakresem = 1  
-                        return tablica_id_wpisow
-                    if flaga_data_w_zakresie:
-                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
-                
-                ostatni_wpis_na_pobranej_stronie_tagu = tablica_id_wpisow[-1] 
-                surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/"  + nazwa_tagu + "/next/entry-" + ostatni_wpis_na_pobranej_stronie_tagu + "/")            
-        except:
-            print("\t\t[!] Błąd pobrania id wpisów pod tagiem!")
-            return -1
-    
-    if len(argumenty) == 2 or len(argumenty) > 3:
+    else:
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_na_tagu'")
         return -1
 
@@ -258,6 +247,36 @@ def pobranie_plusujacych_uzytkownika(*argumenty):
             print("\t\t[!] Błąd pobrania komentujących wpisy użytkownika!")
             return -1
     return lista_plusujacych_uzytkownika
+
+
+def pobranie_komentujacych_tag(*argumenty):
+    lista_komentujacych_tag = []
+    lista_id_postow_tagu = []
+    nazwa_tagu = argumenty[0]
+    if len(argumenty) == 1 or len(argumenty) == 3 :
+        if len(argumenty) == 1:
+            data_koncowa = datetime.date.today()
+            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+        else:
+            data_poczatkowa = date.fromisoformat(argumenty[1])
+            data_koncowa = date.fromisoformat(argumenty[2])
+        try:
+            lista_id_postow_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, str(data_poczatkowa), str(data_koncowa))
+            for id_wpisu in lista_id_postow_tagu:
+                lista_komentujacych_tag += pobranie_komentujacych_wpis(id_wpisu)
+        except:
+            print("\t\t[!] Błąd pobrania komentujących wpisy pod tagiem!")
+            return -1
+    else:
+        print("\t\t[!] Błąd pobrania komentujących wpisy pod tagiem!")
+        return -1
+        
+    return lista_komentujacych_tag
+
+
+def pobranie_plusujacych_tag(*argumenty):
+    
+    pass
 
 
 def pobranie_aktywnych_lubiany_uz(*argumenty):
@@ -453,8 +472,11 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 #zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
 
 ##
-print(pobranie_id_wpisow_na_tagu("p0lka"))
-print(pobranie_id_wpisow_na_tagu("p0lka", "2020-03-06", "2020-03-13"))
+print(pobranie_komentujacych_wpis(47827155))
+#print(pobranie_id_wpisow_na_tagu("kolanowirus"))
+#print(pobranie_id_wpisow_na_tagu("kolanowirus", "2020-02-01", "2020-03-13"))
+#print(pobranie_komentujacych_tag("kolanowirus"))
+#print(pobranie_komentujacych_tag("kolanowirus", "2020-03-06", "2020-03-13"))
 ##
 
 # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
