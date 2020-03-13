@@ -143,7 +143,6 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
                     return tablica_id_wpisow
                 for wpis in lista_wpisow:
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
-                    print(data_wpisu)
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
                         flaga_data_w_zakresie = 1
                     if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
@@ -253,6 +252,7 @@ def pobranie_komentujacych_tag(*argumenty):
     lista_komentujacych_tag = []
     lista_id_postow_tagu = []
     nazwa_tagu = argumenty[0]
+    
     if len(argumenty) == 1 or len(argumenty) == 3 :
         if len(argumenty) == 1:
             data_koncowa = datetime.date.today()
@@ -275,8 +275,28 @@ def pobranie_komentujacych_tag(*argumenty):
 
 
 def pobranie_plusujacych_tag(*argumenty):
+    lista_plusujacych_tag = []
+    lista_id_postow_tagu = []
+    nazwa_tagu = argumenty[0]
+    if len(argumenty) == 1 or len(argumenty) == 3 :
+        if len(argumenty) == 1:
+            data_koncowa = datetime.date.today()
+            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+        else:
+            data_poczatkowa = date.fromisoformat(argumenty[1])
+            data_koncowa = date.fromisoformat(argumenty[2])
+        try:
+            lista_id_postow_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, str(data_poczatkowa), str(data_koncowa))
+            for id_wpisu in lista_id_postow_tagu:
+                lista_plusujacych_tag += pobranie_plusujacych_wpis(id_wpisu)
+        except:
+            print("\t\t[!] Błąd pobrania plusujących wpisy pod tagiem!")
+            return -1
+    else:
+        print("\t\t[!] Błąd pobrania plusujących wpisy pod tagiem!")
+        return -1
     
-    pass
+    return lista_plusujacych_tag
 
 
 def pobranie_aktywnych_lubiany_uz(*argumenty):
@@ -390,20 +410,72 @@ def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspol
     
     return zbior_wspolny    
 
+#TODO -=====================================================================================================================================================================================================
 
-def pobranie_aktywnych_lubiany_tagi(*argumenty):
+def pobranie_aktywnych_lubiany_tag(*argumenty):
     lista_wszystkich_komentujacych = []
     lista_wszystkich_plusujacych = []
+    wszyscy_aktywni = []
     nazwa_tagu = argumenty[0]
     
     print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu + "...\t\t", end='')
+    if len(argumenty) == 1 or len(argumenty) == 3:
+        if len(argumenty) == 3:
+            data_poczatkowa = argumenty[1]
+            data_koncowa = argumenty[2]
+        else:
+            data_koncowa = datetime.date.today()
+            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+        try: 
+            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)
+            lista_wszystkich_plusujacych = pobranie_plusujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)   
+            wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
+        except:
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod lubianym tagiem (plusujących i komentujących)!")
+            return -1
+    else:
+        print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod lubianym tagiem (plusujących i komentujących) - zła liczba argumentów!")
+        return -1
+
+    print("[+] ZAKOŃCZONO")
+    return wszyscy_aktywni
 
 
-def pobranie_aktywnych_nielubianych_tag(*argumenty):
+def pobranie_aktywnych_nielubiany_tag(*argumenty):
     lista_wszystkich_komentujacych = []
+    wszyscy_aktywni = []
     nazwa_tagu = argumenty[0]
+    
+    print("\nPobieranie informacji o nielubianym tagu " + nazwa_tagu + "...\t\t", end='')
+    if len(argumenty) == 1 or len(argumenty) == 3:
+        if len(argumenty) == 3:
+            data_poczatkowa = argumenty[1]
+            data_koncowa = argumenty[2]
+        else:
+            data_koncowa = datetime.date.today()
+            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+        try:    
+            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)
+            wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
+        except:
+            print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod nielubianym tagiem (komentujących)!")
+            return -1
+    else:
+        print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod nielubianym tagiem (komentujących)! - zła liczba argumentów")
+        return -1
 
-    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu + "...\t\t", end='')
+    print("[+] ZAKOŃCZONO")
+    return wszyscy_aktywni
+
+
+def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny):
+    pass
+
+def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny):
+    pass
+
+
+#TODO ======================================================================================================================================================================================================
 
 
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
@@ -472,11 +544,14 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 #zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
 
 ##
-print(pobranie_komentujacych_wpis(47827155))
 #print(pobranie_id_wpisow_na_tagu("kolanowirus"))
 #print(pobranie_id_wpisow_na_tagu("kolanowirus", "2020-02-01", "2020-03-13"))
 #print(pobranie_komentujacych_tag("kolanowirus"))
 #print(pobranie_komentujacych_tag("kolanowirus", "2020-03-06", "2020-03-13"))
+#print(pobranie_plusujacych_tag("kolanowirus"))
+#print(pobranie_plusujacych_tag("kolanowirus", "2020-03-06", "2020-03-13"))
+print(pobranie_aktywnych_lubiany_tag("kolanowirus", "2020-03-06", "2020-03-13"))
+print(pobranie_aktywnych_nielubiany_tag("kolanowirus", "2020-03-06", "2020-03-13"))
 ##
 
 # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
