@@ -5,6 +5,7 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup as bs
 import datetime
+from datetime import date
 
 def plusujacy_wpis_surowe_dane(id_wpisu):
     try:
@@ -97,11 +98,13 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
                         flaga_data_w_zakresie = 1
+                    if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
+                        flaga_data_w_zakresie = 0
+                        flaga_data_poza_zakresem = 1 
+                        return tablica_id_wpisow
                     if flaga_data_w_zakresie:
                         tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
-                    if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
-                        flaga_data_poza_zakresem = 1 
-                        break 
+                    
         except:
             print("\t\t[!] Błąd pobrania id wpisów użytkownika!")
             return -1
@@ -110,12 +113,10 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_uzytkownika'")
         return -1
 
-    return tablica_id_wpisow
-
  
 def pobranie_id_wpisow_na_tagu(*argumenty):
     tablica_id_wpisow = []
-    nazwa_tagu = argumenty[0]    
+    nazwa_tagu = argumenty[0]
     flaga_data_w_zakresie = 0
     flaga_data_poza_zakresem = 0
 
@@ -123,31 +124,55 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
         try:
             data_koncowa = datetime.date.today()
             data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
-            print("Data początkowa: " + str(data_poczatkowa))
-            print("Data końcowa: " + str(data_koncowa))
-            #while not flaga_data_poza_zakresem:    
-            surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/kolanowirus")# + nazwa_tagu)
-            soup = bs(surowe_dane_strony.text, "lxml")
-            print(soup)
-            lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
-            print(len(lista_wpisow))
+            surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu)
+            while not flaga_data_poza_zakresem:    
+                soup = bs(surowe_dane_strony.text, "lxml")
+                lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+                for wpis in lista_wpisow:
+                    data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
+                    if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
+                        flaga_data_w_zakresie = 1
+                    if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
+                        flaga_data_w_zakresie = 0
+                        flaga_data_poza_zakresem = 1  
+                        return tablica_id_wpisow
+                    if flaga_data_w_zakresie:
+                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
                 
-        
+                ostatni_wpis_na_pobranej_stronie_tagu = tablica_id_wpisow[-1] 
+                surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/"  + nazwa_tagu + "/next/entry-" + ostatni_wpis_na_pobranej_stronie_tagu + "/")            
         except:
             print("\t\t[!] Błąd pobrania id wpisów pod tagiem!")
             return -1
     
     if len(argumenty) == 3:
-        data_poczatkowa = date.fromisoformat(argumenty[1])
-        data_koncowa = date.fromisoformat(argumenty[2])
+        try:
+            data_poczatkowa = date.fromisoformat(argumenty[1])
+            data_koncowa = date.fromisoformat(argumenty[2])
+            surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu)
+            while not flaga_data_poza_zakresem:    
+                soup = bs(surowe_dane_strony.text, "lxml")
+                lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+                for wpis in lista_wpisow:
+                    data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
+                    if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
+                        flaga_data_w_zakresie = 1
+                    if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
+                        flaga_data_w_zakresie = 0
+                        flaga_data_poza_zakresem = 1  
+                        return tablica_id_wpisow
+                    if flaga_data_w_zakresie:
+                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
+                
+                ostatni_wpis_na_pobranej_stronie_tagu = tablica_id_wpisow[-1] 
+                surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/"  + nazwa_tagu + "/next/entry-" + ostatni_wpis_na_pobranej_stronie_tagu + "/")            
+        except:
+            print("\t\t[!] Błąd pobrania id wpisów pod tagiem!")
+            return -1
+    
     if len(argumenty) == 2 or len(argumenty) > 3:
         print("Niewłaściwa liczba argumentów funkcji 'pobranie_id_wpisow_na_tagu'")
         return -1
-
-    flaga_data_w_zakresie = 0
-    flaga_data_poza_zakresem = 0
-
-    return tablica_id_wpisow
 
  
 def pobranie_listy_analizowanych_tagow_i_uzytkownikow():
@@ -428,7 +453,8 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 #zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
 
 ##
-pobranie_id_wpisow_na_tagu("kolanowirus")
+print(pobranie_id_wpisow_na_tagu("p0lka"))
+print(pobranie_id_wpisow_na_tagu("p0lka", "2020-03-06", "2020-03-13"))
 ##
 
 # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
