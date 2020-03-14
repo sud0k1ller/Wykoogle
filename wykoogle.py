@@ -275,7 +275,6 @@ def pobranie_komentujacych_tag(*argumenty):
     lista_komentujacych_tag = []
     lista_id_postow_tagu = []
     nazwa_tagu = argumenty[0]
-    
     if len(argumenty) == 1 or len(argumenty) == 3 :
         if len(argumenty) == 1:
             data_koncowa = datetime.date.today()
@@ -293,7 +292,7 @@ def pobranie_komentujacych_tag(*argumenty):
             print("[!] Błąd pobrania komentujących wpisy pod tagiem " + argumenty[0] + "! [funkcja 'pobranie_komentujacych_tag']")
             return -1
     else:
-        print("[!] Błąd pobrania komentujących wpisy pod tagiem " + argumenty[0] + "! [funkcja 'pobranie_komentujacych_tag']")
+        print("Nieprawidłowa liczba argumentów! [funkcja 'pobranie_komentujacych_tag']")
         return -1 
 
 
@@ -340,7 +339,7 @@ def pobranie_aktywnych_lubiany_uz(*argumenty):
             wszyscy_aktywni.remove(nazwa_uzytkownika)
             print("[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami użytkownika " + argumenty[0] + " zakończone!")
             return wszyscy_aktywni
-       except:
+        except:
             print("[!] Błąd pobrania aktywnych (plusujących i komentujących) pod wpisami lubianego użytkownika " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_lubiany_uz']")
             return -1
 
@@ -398,41 +397,51 @@ def zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow):
     zbior_wspolny = []
     temp_tablica = []
 
-    for uzytkownik in tablica_lubianych_uzytkownikow:
-        if len(uzytkownik.split()) == 1:
-            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0])
-        if len(uzytkownik.split()) == 2:
-            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
-        if len(uzytkownik.split()) == 3:
-            temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
-        if zbior_wspolny:
-            zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-        if not zbior_wspolny and flaga_zbior_wspolny_pusty_na_poczatku:
-            zbior_wspolny = temp_tablica
-            flaga_zbior_wspolny_pusty_na_poczatku = 0
-        if not zbior_wspolny and not flaga_zbior_wspolny_pusty_na_poczatku:
-            print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach")
-            return -1
+    try:
+        for uzytkownik in tablica_lubianych_uzytkownikow:
+             if len(uzytkownik.split()) == 1:
+                 temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0])
+             if len(uzytkownik.split()) == 2:
+                 temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
+             if len(uzytkownik.split()) == 3:
+                 temp_tablica = pobranie_aktywnych_lubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
+             if zbior_wspolny:
+                 zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+             if not zbior_wspolny and flaga_zbior_wspolny_pusty_na_poczatku:
+                 zbior_wspolny = temp_tablica
+                 flaga_zbior_wspolny_pusty_na_poczatku = 0
+             if not zbior_wspolny and not flaga_zbior_wspolny_pusty_na_poczatku:
+                 print("[!] Brak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach")
+                 return []
+    except:
+        print("[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami LUBIANYCH użytkowników! funkcja ['zbior_wspolny_lubianych_uz']")
+        return -1
     
+    print("[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami LUBIANYCH użytkowników!")
     return zbior_wspolny    
 
 
 def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny):
     temp_tablica = []
 
-    for uzytkownik in tablica_nielubianych_uzytkownikow:
-        if len(uzytkownik.split()) == 1:
-            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0])
-        if len(uzytkownik.split()) == 2:
-            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
-        if len(uzytkownik.split()) == 3:
-            temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
-        if zbior_wspolny:
-            zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-        if not zbior_wspolny :
-            print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH użytkowników w określonych okresach")
-            return -1
-    
+    try:
+        for uzytkownik in tablica_nielubianych_uzytkownikow:
+            if len(uzytkownik.split()) == 1:
+                temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0])
+            if len(uzytkownik.split()) == 2:
+                temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1])
+            if len(uzytkownik.split()) == 3:
+                temp_tablica = pobranie_aktywnych_nielubiany_uz(uzytkownik.split()[0], uzytkownik.split()[1], uzytkownik.split()[2])
+            if zbior_wspolny:
+                zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+            if not zbior_wspolny:
+                print("[!] Brak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH użytkowników w określonych okresach")
+                return []
+    except:
+        print("[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami NIELUBIANYCH użytkowników! funkcja ['zbior_wspolny_nielubianych_uz']")
+        return -1
+         
+    print("[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami NIELUBIANYCH użytkowników!")
     return zbior_wspolny    
 
 
@@ -442,27 +451,26 @@ def pobranie_aktywnych_lubiany_tag(*argumenty):
     wszyscy_aktywni = []
     nazwa_tagu = argumenty[0]
     
-    print("\nPobieranie informacji o lubianym tagu " + nazwa_tagu + "...\t\t", end='')
+    print("Pobieranie informacji o LUBIANYM tagu " + nazwa_tagu + "...")
     if len(argumenty) == 1 or len(argumenty) == 3:
-        if len(argumenty) == 3:
-            data_poczatkowa = argumenty[1]
-            data_koncowa = argumenty[2]
-        else:
-            data_koncowa = datetime.date.today()
-            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
-        try: 
-            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)
+        try:       
+            if len(argumenty) == 3:
+                data_poczatkowa = argumenty[1]
+                data_koncowa = argumenty[2]
+            else:
+                data_koncowa = str(datetime.date.today())
+                data_poczatkowa = str(datetime.date.today() - datetime.timedelta(weeks=1))
+            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)    
             lista_wszystkich_plusujacych = pobranie_plusujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)   
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
+            print("[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami pod LUBIANYM tagiem " + argumenty[0] + " zakończone!")
+            return wszyscy_aktywni
         except:
-            print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod lubianym tagiem (plusujących i komentujących)!")
+            print("[!] Błąd pobrania aktywnych (plusujących i komentujących) pod wpisami pod LUBIANYM tagiem " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_lubiany_tag']")
             return -1
     else:
-        print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod lubianym tagiem (plusujących i komentujących) - zła liczba argumentów!")
+        print("[!] Nieprawidłowa liczba argumentów! [funkcja 'pobranie_aktywnych_lubianych_tag']")
         return -1
-
-    print("[+] ZAKOŃCZONO")
-    return wszyscy_aktywni
 
 
 def pobranie_aktywnych_nielubiany_tag(*argumenty):
@@ -470,65 +478,70 @@ def pobranie_aktywnych_nielubiany_tag(*argumenty):
     wszyscy_aktywni = []
     nazwa_tagu = argumenty[0]
     
-    print("\nPobieranie informacji o nielubianym tagu " + nazwa_tagu + "...\t\t", end='')
+    print("\nPobieranie informacji o NIELUBIANYM tagu " + nazwa_tagu + "...\t\t", end='')
     if len(argumenty) == 1 or len(argumenty) == 3:
-        if len(argumenty) == 3:
-            data_poczatkowa = argumenty[1]
-            data_koncowa = argumenty[2]
-        else:
-            data_koncowa = datetime.date.today()
-            data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
-        try:    
+        try:        
+            if len(argumenty) == 3:
+                data_poczatkowa = argumenty[1]
+                data_koncowa = argumenty[2]
+            else:
+                data_koncowa = str(datetime.date.today())
+                data_poczatkowa = str(datetime.date.today() - datetime.timedelta(weeks=1))
+            
             lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
+            print("[+] Pobranie aktywnych (komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + " zakończone!")
+            return wszyscy_aktywni
         except:
-            print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod nielubianym tagiem (komentujących)!")
+            print("[!] Błąd pobrania aktywnych (komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_nielubiany_tag']")
             return -1
     else:
-        print("\t\t[!] Błąd pobrania aktywnych pod wpisami pod nielubianym tagiem (komentujących)! - zła liczba argumentów")
+        print("[!] Nieprawidłowa liczba argumentów! [funkcja 'pobranie_aktywnych_nielubianych_tag']")
         return -1
 
-    print("[+] ZAKOŃCZONO")
-    return wszyscy_aktywni
-
-#TODO -=====================================================================================================================================================================================================
 
 def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny):
     temp_tablica = []
 
-    for tag in tablica_lubianych_uzytkownikow:
-        if len(tag.split()) == 1:
-            temp_tablica = pobranie_aktywnych_lubiany_tag(tag.split()[0])
-        if len(tag.split()) == 3:
-            temp_tablica = pobranie_aktywnych_lubiany_tag(tag.split()[0], tag.split()[1], tag.split()[2])
-        if zbior_wspolny:
-            zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-        if not zbior_wspolny :
-            print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH tagów w określonych okresach")
-            return -1
-    
-    return zbior_wspolny 
+    try:
+        for tag in tablica_lubianych_tagow:
+            if len(tag.split()) == 1:
+                temp_tablica = pobranie_aktywnych_lubiany_tag(tag.split()[0])
+            if len(tag.split()) == 3:
+                temp_tablica = pobranie_aktywnych_lubiany_tag(tag.split()[0], tag.split()[1], tag.split()[2])
+            if zbior_wspolny:
+                zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+            if not zbior_wspolny :
+                print("[!] Brak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH tagów w określonych okresach")
+                return []
+    except:
+        print("[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami pod LUBIANYMI tagami! funkcja ['zbior_wspolny_lubianych_tagow']")
+        return -1
+
+    print("[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami pod LUBIANYMI tagami!")
+    return zbior_wspolny
 
 
 def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny):
     temp_tablica = []
 
-    for tag in tablica_nielubianych_uzytkownikow:
-        if len(tag.split()) == 1:
-            temp_tablica = pobranie_aktywnych_nielubiany_tag(tag.split()[0])
-        if len(tag.split()) == 3:
-            temp_tablica = pobranie_aktywnych_nielubiany_tag(tag.split()[0], tag.split()[1], tag.split()[2])
-        if zbior_wspolny:
-            zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
-        if not zbior_wspolny :
-            print("\n\tBrak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH tagów w określonych okresach")
-            return -1
-    
+    try:
+        for tag in tablica_nielubianych_tagow:
+            if len(tag.split()) == 1:
+                temp_tablica = pobranie_aktywnych_nielubiany_tag(tag.split()[0])
+            if len(tag.split()) == 3:
+                temp_tablica = pobranie_aktywnych_nielubiany_tag(tag.split()[0], tag.split()[1], tag.split()[2])
+            if zbior_wspolny:
+                zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
+            if not zbior_wspolny :
+                print("[!] Brak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH tagów w określonych okresach")
+                return []
+    except:
+        print("[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami pod NIELUBIANYMI tagami! funkcja ['zbior_wspolny_nielubianych_tagow']")
+        return -1
+
+    print("[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami NIELUBIANYCH użytkowników!")
     return zbior_wspolny 
-
-
-
-#TODO ======================================================================================================================================================================================================
 
 
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
@@ -581,11 +594,11 @@ def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, ta
     else:
         print("\nNie wybrano nielubianych tagów\n")
 
-def wyswielt_informacje_koncowe(zbior_wspolny):
+def wyswietl_informacje_koncowe(zbior_wspolny):
     
     if zbior_wspolny:
         print("Podczas analizy wybranych użytkowników i tagów wytypowano następujące osoby:")
-        for uzytkownik, indeks in zbior_wspolny, range(len(wzbior_wspolny)):
+        for uzytkownik, indeks in zbior_wspolny, range(len(zbior_wspolny)):
             print("\t\t" + str(indeks) + ") " + uzytkownik)
         return 0
     else:
@@ -603,15 +616,23 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 
 # Wybierz zbiór wspólny dla lubianych użytkowników
 zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
-
+if not zbior_wspolny:
+    print("Brak użytkowników odpowiadających kryteriom.")
+    
 # Zmodyfikuj zbiór wspólny uwzględniając nielubianych użytkowników
 zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
+if not zbior_wspolny:
+    print("Brak użytkowników odpowiadających kryteriom.")
 
 # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
 zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
+if not zbior_wspolny:
+    print("Brak użytkowników odpowiadających kryteriom.")
 
 # Zmodyfikuj zbiór wspólny uwzględniając nielubianye tagów
 zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
+if not zbior_wspolny:
+    print("Brak użytkowników odpowiadających kryteriom.")
 
 # Wyświetl informacje o otrzymanym zbiorze wspólnym
 wyswietl_informacje_koncowe(zbior_wspolny)
