@@ -595,8 +595,8 @@ def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, ta
         print("\nNie wybrano nielubianych tagów\n")
 
 def wyswietl_informacje_koncowe(zbior_wspolny):
-    
-    if zbior_wspolny:
+
+    if zbior_wspolny > 0:
         print("Podczas analizy wybranych użytkowników i tagów wytypowano następujące osoby:")
         for uzytkownik, indeks in zbior_wspolny, range(len(zbior_wspolny)):
             print("\t\t" + str(indeks) + ") " + uzytkownik)
@@ -605,6 +605,33 @@ def wyswietl_informacje_koncowe(zbior_wspolny):
         print("Podczas analizy nie udało się znaleźć osób pasujących do wybranych kryteriów. Spróbuj poszerzyć zakres dat lub zmienić analizowane tagi i użytkowników")
         return -1
 
+def wygeneruj_zbior_wspolny(zbior_wspolny):
+
+    # Wybierz zbiór wspólny dla lubianych użytkowników
+    zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
+    if not zbior_wspolny:
+        print("Brak użytkowników odpowiadających kryteriom.")
+        return -1    
+    
+    # Zmodyfikuj zbiór wspólny uwzględniając nielubianych użytkowników
+    zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
+    if not zbior_wspolny:
+        print("Brak użytkowników odpowiadających kryteriom.")
+        return -1    
+    
+    # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
+    zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
+    if not zbior_wspolny:
+        print("Brak użytkowników odpowiadających kryteriom.")
+        return -1    
+    
+    # Zmodyfikuj zbiór wspólny uwzględniając nielubianye tagów
+    zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
+    if not zbior_wspolny:
+        print("Brak użytkowników odpowiadających kryteriom.")
+        return -1    
+
+    return zbior_wspolny
 
 #===== MAIN =====
 zbior_wspolny = []
@@ -614,25 +641,8 @@ tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych
 # Wyświetl pobrane informacje oraz wskaż błędy
 wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow)
 
-# Wybierz zbiór wspólny dla lubianych użytkowników
-zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
-if not zbior_wspolny:
-    print("Brak użytkowników odpowiadających kryteriom.")
-    
-# Zmodyfikuj zbiór wspólny uwzględniając nielubianych użytkowników
-zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
-if not zbior_wspolny:
-    print("Brak użytkowników odpowiadających kryteriom.")
-
-# Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
-zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
-if not zbior_wspolny:
-    print("Brak użytkowników odpowiadających kryteriom.")
-
-# Zmodyfikuj zbiór wspólny uwzględniając nielubianye tagów
-zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
-if not zbior_wspolny:
-    print("Brak użytkowników odpowiadających kryteriom.")
+# Wygeneruj zbiór wspólny
+zbior_wspolny = wygeneruj_zbior_wspolny(zbior_wspolny)
 
 # Wyświetl informacje o otrzymanym zbiorze wspólnym
 wyswietl_informacje_koncowe(zbior_wspolny)
