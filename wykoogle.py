@@ -6,7 +6,8 @@ from lxml import html
 from bs4 import BeautifulSoup as bs
 import datetime
 from datetime import date
-
+from progress.bar import ShadyBar
+from progress.spinner import PieSpinner
 
 class colors:
     BLUE = '\033[34m'
@@ -21,7 +22,7 @@ def plusujacy_wpis_surowe_dane(id_wpisu):
     try:
         url_json_plusujacy_wpis = "https://www.wykop.pl/ajax2/wpis/upvoters/" + str(id_wpisu)    
         surowe_dane_string  = requests.get(url_json_plusujacy_wpis)
-        print("\t\t[+] Pobranie surowych danych o plusujących wpis " + str(id_wpisu) + " zakończone!")
+        #print("\t\t[+] Pobranie surowych danych o plusujących wpis " + str(id_wpisu) + " zakończone!")
         return surowe_dane_string.text
     except:
         print(colors.RED + "\t\t[!] Błąd pobierania surowych danych o plusujących wpis " + str(id_wpisu) + "! [funkcja 'plusujacy_wpis_surowe_dane']" + colors.END)
@@ -32,7 +33,7 @@ def ekstrakcja_plusujacych_wpis(surowe_dane_string):
     try:
         tablica_plusujacych = []
         tablica_plusujacych = re.findall('ludzie\\\/(.*?)\\\/ class', surowe_dane_string)
-        print("\t\t[+] Utworzenie listy plusujących wpis zakończone!")
+        #print("\t\t[+] Utworzenie listy plusujących wpis zakończone!")
         return tablica_plusujacych
     except:
         print(colors.RED + "\t\t[!] Błąd utworzenia listy plusujących wpis! [funkcja 'ekstrakcja_plusujacych_wpis']" + colors.END)
@@ -44,7 +45,7 @@ def pobranie_plusujacych_wpis(id_wpisu):
         plusujacy_wpis = []
         surowe_dane = plusujacy_wpis_surowe_dane(id_wpisu)
         plusujacy_wpis = ekstrakcja_plusujacych_wpis(id_wpisu)
-        print("\t\t[+] Pobranie plusujących wpis " + str(id_wpisu)+ " zakończone!")
+        #print("\t\t[+] Pobranie plusujących wpis " + str(id_wpisu)+ " zakończone!")
         return plusujacy_wpis
     except:
         print(colors.RED + "\t\t[!] Błąd pobierania plusujących wpis " + str(id_wpisu) +"! [funkcja 'pobranie_plusujacych_wpis']" + colors.RED)   
@@ -54,7 +55,7 @@ def komentujacy_wpis_surowe_dane(id_wpisu):
     try:
         url_wpisu = "https://www.wykop.pl/wpis/" + str(id_wpisu)
         surowe_dane_string = requests.get(url_wpisu)
-        print("\t\t[+] Pobieranie surowych danych o komentujących wpis " + str(id_wpisu) + " zakończone!")
+        #print("\t\t[+] Pobieranie surowych danych o komentujących wpis " + str(id_wpisu) + " zakończone!")
         return surowe_dane_string
     except:
         print(colors.RED + "\t\t[!] Błąd pobierania surowych danych o komentujących wpis " + str(id_wpisu) + "! [funkcja 'komentujacy_wpis_surowe_dane]" + colors.END)
@@ -70,7 +71,7 @@ def ekstrakcja_komentujacych_wpis(surowe_dane_string):
         for komentujacy_uzytkownik in lista_komentujacych:
             komentujacy.append(komentujacy_uzytkownik.find('a', {'class':'profile'}).attrs.get('href').split('/')[4]) 
         komentujacy = list(dict.fromkeys(komentujacy))
-        print("\t\t[+] Utworzenie listy komentujących wpis zakończone!")
+        #print("\t\t[+] Utworzenie listy komentujących wpis zakończone!")
         return komentujacy
     except:
         print(colors.RED + "\t\t[!] Błąd utworzenia listy komentujących wpis! [funkcja 'ekstrakcja_komentujacych_wpis']" + colors.END)
@@ -82,7 +83,7 @@ def pobranie_komentujacych_wpis(id_wpisu):
         komentujacy_wpis = []
         surowe_dane = komentujacy_wpis_surowe_dane(id_wpisu)
         komentujacy_wpis = ekstrakcja_komentujacych_wpis(surowe_dane)
-        print("\t\t[+] Pobieranie komentujących wpis " + str(id_wpisu) + " zakończone!")
+        #print("\t\t[+] Pobieranie komentujących wpis " + str(id_wpisu) + " zakończone!")
         return komentujacy_wpis
     except:
         print(colors.RED + "\t\t[!] Błąd pobierania komentujących wpis " + str(id_wpisu) + "! [funkcja 'pobranie_komentujacych_wpis']" + colors.END)
@@ -100,16 +101,18 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
             liczba_stron_do_analizy = int(argumenty[1])
         
         try:
+            spinner_postepu = PieSpinner(colors.GREEN + '\t[#] Pobieranie id wpisów użytkownika w wybranym zakresie ' + colors.END)
             for strona in range(numer_strony, liczba_stron_do_analizy + 1):
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(strona))  
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
-                    tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
-            print(colors.GREEN + "\t[+] Pobranie id wpisów użytkownika zakończone" + colors.END)
+                    tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))    
+                spinner_postepu.next()
+            print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
             return tablica_id_wpisow
         except:
-            print("[!] Błąd pobrania id wpisów użytkownika! [funkcja 'pobranie_id_wpisow_uzytkownika']")
+            print("\t[!] Błąd pobrania id wpisów użytkownika! [funkcja 'pobranie_id_wpisow_uzytkownika']")
             return -1
 
     if len(argumenty) == 3:
@@ -118,26 +121,29 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
         flaga_data_w_zakresie = 0
         flaga_data_poza_zakresem = 0        
         try:
+            spinner_postepu = PieSpinner(colors.GREEN + '\t[#] Pobieranie id wpisów użytkownika w wybranym zakresie ' + colors.END)
             while not flaga_data_poza_zakresem:
+                
+                spinner_postepu.next()    
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
                 numer_strony += 1
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 if not len(lista_wpisow):
-                    print(colors.GREEN + "\t[+] Pobranie id wpisów użytkownika " + argumenty[0] + " zakończone" + colors.END)
+                    print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
                     return tablica_id_wpisow
                 for wpis in lista_wpisow:
+                    spinner_postepu.next()    
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
                         flaga_data_w_zakresie = 1
                     if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
                         flaga_data_w_zakresie = 0
                         flaga_data_poza_zakresem = 1
-                        print(colors.GREEN + "\t[+] Pobranie id wpisów użytkownika " + argumenty[0] + " zakończone" + colors.END)
+                        print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO" + colors.END)
                         return tablica_id_wpisow
                     if flaga_data_w_zakresie:
-                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))   
-                    
+                        tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
         except:
             print(colors.BOLD + colors.RED + "\t[!] Błąd pobrania id wpisów użytkownika " +argumenty[0] + "! [funkcja 'pobranie_id_wpisow_uzytkownika']" + colors.END)
             return -1
@@ -216,30 +222,36 @@ def pobranie_komentujacych_uzytkownika(*argumenty):
     lista_id_postow_uzytkownika = []
     lista_komentujacych_uzytkownika = []
     nazwa_uzytkownika = argumenty[0]
+    lista_id_postow_uzytkownika = []
     
-    if len(argumenty) == 2 or len(argumenty) == 1:
-        if len(argumenty) == 1:
+    if len(argumenty) == 3 or len(argumenty) == 2:
+        if len(argumenty) == 2:
             liczba_stron = 1
+            lista_id_postow_uzytkownika = argumenty[1]
         else:
-            liczba_stron = int(argumenty[1])   
+            liczba_stron = int(argumenty[1])
+            lista_id_postow_uzytkownika = argumenty[2]
         try:
-            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            pasek_postepu = ShadyBar(colors.GREEN + '\t[#] Pobieranie wszystkich komentujących wpisy użytkownika\t' + colors.END, max=len(lista_id_postow_uzytkownika), suffix='%(percent)d%%')
             for id_wpisu in lista_id_postow_uzytkownika:
                 lista_komentujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
-            print(colors.GREEN + "\t[+] Pobranie komentujących wszystkie wpisy użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+                pasek_postepu.next()
+            print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
             return lista_komentujacych_uzytkownika
         except:
             print(colors.RED + "\t[!] Błąd pobrania komentujących wszystkie wpisy użytkownika " + argumenty[0] + "! [funkcja 'pobranie_komentujacych_uzytkownika']" + colors.END)
             return -1
 
-    if len(argumenty) == 3:
+    if len(argumenty) == 4:
         data_poczatkowa = argumenty[1]
         data_koncowa = argumenty[2]
+        lista_id_postow_uzytkownika = argumenty[3]
         try:
-            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            pasek_postepu = ShadyBar(colors.GREEN + '\t[#] Pobieranie wszystkich komentujących wpisy użytkownika\t' + colors.END, max=len(lista_id_postow_uzytkownika), suffix='%(percent)d%%')
             for id_wpisu in lista_id_postow_uzytkownika:
                 lista_komentujacych_uzytkownika += pobranie_komentujacych_wpis(id_wpisu)
-            print(colors.GREEN + "\t[+] Pobranie komentujących wszystkie wpisy użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+                pasek_postepu.next()
+            print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
             return lista_komentujacych_uzytkownika
         except:
             print(colors.RED + "\t[!] Błąd pobrania komentujących wpisy użytkownika " + argumenty[0] + "! [funkcja 'pobranie_komentujacych_uzytkownika']" + colors.END)
@@ -250,30 +262,35 @@ def pobranie_plusujacych_uzytkownika(*argumenty):
     lista_id_postow_uzytkownika = []
     lista_plusujacych_uzytkownika = []
     nazwa_uzytkownika = argumenty[0]
-   
-    if len(argumenty) == 2 or len(argumenty) == 1:
-        if len(argumenty) == 1:
+    lista_id_postow_uzytkownika = []
+    if len(argumenty) == 3 or len(argumenty) == 2:
+        if len(argumenty) == 2:
             liczba_stron = 1
+            lista_id_postow_uzytkownika = argumenty[1]
         else:
             liczba_stron = int(argumenty[1])
+            lista_id_postow_uzytkownika = argumenty[2]
         try:
-            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            pasek_postepu = ShadyBar(colors.GREEN + '\t[#] Pobieranie wszystkich plusujących wpisy użytkownika\t\t'+ colors.END, max=len(lista_id_postow_uzytkownika), suffix='%(percent)d%%')
             for id_wpisu in lista_id_postow_uzytkownika:
                 lista_plusujacych_uzytkownika += pobranie_plusujacych_wpis(id_wpisu)
-            print(colors.GREEN + "\t[+] Pobranie plusujących wpisy użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+                pasek_postepu.next()
+            print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
             return lista_plusujacych_uzytkownika
         except:
             print(colors.RED + "\t[!] Błąd pobrania plusujących wpisy użytkownika " + argumenty[0] + "! [funkcja 'pobranie_plusujacych_uzytkownika']" + colors.END)
             return -1
 
-    if len(argumenty) == 3:
+    if len(argumenty) == 4:
         data_poczatkowa = argumenty[1]
         data_koncowa = argumenty[2]
+        lista_id_postow_uzytkownika = argumenty[3]
         try:
-            lista_id_postow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            pasek_postepu = ShadyBar(colors.GREEN + '\t[#] Pobieranie wszystkich plusujących wpisy użytkownika\t\t'+ colors.END, max=len(lista_id_postow_uzytkownika), suffix='%(percent)d%%')
             for id_wpisu in lista_id_postow_uzytkownika:
                 lista_plusujacych_uzytkownika += pobranie_plusujacych_wpis(id_wpisu)
-            print(colors.GREEN + "\t[+] Pobranie plusujących wpisy użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+                pasek_postepu.next()
+            print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
             return lista_plusujacych_uzytkownika
         except:
             print(colors.RED + "\t[!] Błąd pobrania plusujących wpisy użytkownika " + argumenty[0] + "! [funkcja 'pobranie_plusujacych_uzytkownika']" + colors.END)
@@ -284,15 +301,18 @@ def pobranie_komentujacych_tag(*argumenty):
     lista_komentujacych_tag = []
     lista_id_postow_tagu = []
     nazwa_tagu = argumenty[0]
-    if len(argumenty) == 1 or len(argumenty) == 3 :
-        if len(argumenty) == 1:
+    lista_id_postow_uzytkownika = []
+    print(len(argumenty))
+    if len(argumenty) == 2 or len(argumenty) == 4 :
+        if len(argumenty) == 2:
             data_koncowa = datetime.date.today()
             data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+            lista_id_postow_uzytkownika = argumenty[2]
         else:
             data_poczatkowa = date.fromisoformat(argumenty[1])
             data_koncowa = date.fromisoformat(argumenty[2])
+            lista_id_postow_uzytkownika = argumenty[3]
         try:
-            lista_id_postow_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, str(data_poczatkowa), str(data_koncowa))
             for id_wpisu in lista_id_postow_tagu:
                 lista_komentujacych_tag += pobranie_komentujacych_wpis(id_wpisu)
             print(colors.GREEN + "\t[+] Pobranie komentujących wpisy pod tagiem " + argumenty[0] + " zakończone!" + colors.END)
@@ -309,15 +329,17 @@ def pobranie_plusujacych_tag(*argumenty):
     lista_plusujacych_tag = []
     lista_id_postow_tagu = []
     nazwa_tagu = argumenty[0]
-    if len(argumenty) == 1 or len(argumenty) == 3 :
-        if len(argumenty) == 1:
+    lista_id_postow_uzytkownika = []
+    if len(argumenty) == 2 or len(argumenty) == 4 :
+        if len(argumenty) == 2:
             data_koncowa = datetime.date.today()
             data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
+            lista_id_postow_uzytkownika = argumenty[2]
         else:
             data_poczatkowa = date.fromisoformat(argumenty[1])
             data_koncowa = date.fromisoformat(argumenty[2])
+            lista_id_postow_uzytkownika = argumenty[3]
         try:
-            lista_id_postow_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, str(data_poczatkowa), str(data_koncowa))
             for id_wpisu in lista_id_postow_tagu:
                 lista_plusujacych_tag += pobranie_plusujacych_wpis(id_wpisu)
             print(colors.GREEN + "\t[+] Pobranie plusujących wpisy pod tagiem " + argumenty[0] + " zakończone!" + colors.END)
@@ -333,6 +355,7 @@ def pobranie_plusujacych_tag(*argumenty):
 def pobranie_aktywnych_lubiany_uz(*argumenty):
     lista_wszystkich_plusujacych = []
     lista_wszystkich_komentujacych = []
+    lista_id_wpisow_uzytkownika = []
     nazwa_uzytkownika = argumenty[0]
 
     print(colors.BLUE + colors.BOLD + "\nPobieranie informacji o LUBIANYM użytkowniku " + nazwa_uzytkownika + "..." + colors.END)
@@ -342,11 +365,12 @@ def pobranie_aktywnych_lubiany_uz(*argumenty):
         else:
             liczba_stron = int(argumenty[1])
         try:
-            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)
-            lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)   
+            lista_id_wpisow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron, lista_id_wpisow_uzytkownika)
+            lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, liczba_stron, lista_id_wpisow_uzytkownika)   
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
             wszyscy_aktywni.remove(nazwa_uzytkownika)
-            print(colors.GREEN + "\t[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+            print(colors.GREEN + "\n\t[+] Zakończono pobieranie informacji o użytkowniku " + argumenty[0] + "!" + colors.END)
             return wszyscy_aktywni
         except:
             print(colors.RED + "\t[!] Błąd pobrania aktywnych (plusujących i komentujących) pod wpisami lubianego użytkownika " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_lubiany_uz']" + colors.END)
@@ -355,12 +379,13 @@ def pobranie_aktywnych_lubiany_uz(*argumenty):
     if len(argumenty) == 3:
         data_poczatkowa = argumenty[1]
         data_koncowa = argumenty[2]
-        try:    
-            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
-            lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)   
+        try:
+            lista_id_wpisow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa, lista_id_wpisow_uzytkownika)
+            lista_wszystkich_plusujacych = pobranie_plusujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa, lista_id_wpisow_uzytkownika)   
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
             wszyscy_aktywni.remove(nazwa_uzytkownika)
-            print(colors.GREEN + "\t[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+            print(colors.GREEN + "\n\t[+] Zakończono pobieranie informacji o użytkowniku " + argumenty[0] + "!" + colors.END)
             return wszyscy_aktywni
         except:
             print(colors.RED + "\t[!] Błąd pobrania aktywnych (plusujących i komentujących) pod wpisami lubianego użytkownika " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_lubiany_uz']" + colors.END)
@@ -370,18 +395,20 @@ def pobranie_aktywnych_lubiany_uz(*argumenty):
 def pobranie_aktywnych_nielubiany_uz(*argumenty):
     lista_wszystkich_plusujacych = []
     nazwa_uzytkownika = argumenty[0]
+    lista_id_wpisow_uzytkownika = []
 
-    print(colors.BLUE + colors.BOLD + "Pobieranie informacji o NIELUBIANYM użytkowniku " + nazwa_uzytkownika + "..." + colors.END)
+    print(colors.BLUE + colors.BOLD + "\nPobieranie informacji o NIELUBIANYM użytkowniku " + nazwa_uzytkownika + "..." + colors.END)
     if len(argumenty) == 2 or len(argumenty) == 1:
         if len(argumenty) == 1:
             liczba_stron = 1
         else:
             liczba_stron = int(argumenty[1])
         try:
-            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            lista_id_wpisow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, liczba_stron)
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, liczba_stron, lista_id_wpisow_uzytkownika)
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
             wszyscy_aktywni.remove(nazwa_uzytkownika)
-            print(colors.GREEN + "\t[+] Pobranie aktywnych (komentujących) pod wpisami użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+            print(colors.GREEN + "\n\t[+] Zakończono pobieranie informacji o użytkowniku " + argumenty[0] + "!" + colors.END)
             return wszyscy_aktywni
         except:
             print(colors.RED + "\t[!] Błąd pobrania aktywnych (komentujących) pod wpisami nielubianego użytkownika " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_nielubiany_uz']" + colors.END)
@@ -391,10 +418,11 @@ def pobranie_aktywnych_nielubiany_uz(*argumenty):
         data_poczatkowa = argumenty[1]
         data_koncowa = argumenty[2]
         try:    
-            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            lista_id_wpisow_uzytkownika = pobranie_id_wpisow_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa)
+            lista_wszystkich_komentujacych = pobranie_komentujacych_uzytkownika(nazwa_uzytkownika, data_poczatkowa, data_koncowa, lista_id_wpisow_uzytkownika)
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
             wszyscy_aktywni.remove(nazwa_uzytkownika)
-            print(colors.GREEN + "\t[+] Pobranie aktywnych (komentujących) pod wpisami użytkownika " + argumenty[0] + " zakończone!" + colors.END)
+            print(colors.GREEN + "\n\t[+] Zakończono pobieranie informacji o użytkowniku " + argumenty[0] + "!" + colors.END)
             return wszyscy_aktywni
         except:
             print(colors.RED + "\t[!] Błąd pobrania aktywnych (komentujących) pod wpisami nielubianego użytkownika " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_nielubiany_uz']" + colors.END)
@@ -420,7 +448,6 @@ def zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow):
                  zbior_wspolny = temp_tablica
                  flaga_zbior_wspolny_pusty_na_poczatku = 0
              if not zbior_wspolny and not flaga_zbior_wspolny_pusty_na_poczatku:
-                 print(colors.RED + "\t[!] Brak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH użytkowników w określonych okresach" + colors.END)
                  return []
     except:
         print(colors.RED + "\t[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami LUBIANYCH użytkowników! funkcja ['zbior_wspolny_lubianych_uz']" + colors.END)
@@ -432,7 +459,7 @@ def zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow):
 
 def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny):
     temp_tablica = []
-
+    print(tablica_nielubianych_uzytkownikow)
     try:
         for uzytkownik in tablica_nielubianych_uzytkownikow:
             if len(uzytkownik.split()) == 1:
@@ -444,7 +471,6 @@ def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspol
             if zbior_wspolny:
                 zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
             if not zbior_wspolny:
-                print(colors.RED + "\t[!] Brak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH użytkowników w określonych okresach" + colors.END)
                 return []
     except:
         print(colors.RED + "\t[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami NIELUBIANYCH użytkowników! funkcja ['zbior_wspolny_nielubianych_uz']" + colors.END)
@@ -459,8 +485,9 @@ def pobranie_aktywnych_lubiany_tag(*argumenty):
     lista_wszystkich_plusujacych = []
     wszyscy_aktywni = []
     nazwa_tagu = argumenty[0]
-    
-    print(colors.BOLD + colors.BLUE + "Pobieranie informacji o LUBIANYM tagu " + nazwa_tagu + "..." + colors.END)
+    lista_id_wpisow_na_tagu = []
+
+    print(colors.BOLD + colors.BLUE + "\nPobieranie informacji o LUBIANYM tagu " + nazwa_tagu + "..." + colors.END)
     if len(argumenty) == 1 or len(argumenty) == 3:
         try:       
             if len(argumenty) == 3:
@@ -469,8 +496,10 @@ def pobranie_aktywnych_lubiany_tag(*argumenty):
             else:
                 data_koncowa = str(datetime.date.today())
                 data_poczatkowa = str(datetime.date.today() - datetime.timedelta(weeks=1))
-            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)    
-            lista_wszystkich_plusujacych = pobranie_plusujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)   
+
+            lista_id_wpisow_na_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, data_poczatkowa, data_koncowa)    
+            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)    
+            lista_wszystkich_plusujacych = pobranie_plusujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)   
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
             print(colors. GREEN + "\t[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami pod LUBIANYM tagiem " + argumenty[0] + " zakończone!" + colors.END)
             return wszyscy_aktywni
@@ -486,6 +515,7 @@ def pobranie_aktywnych_nielubiany_tag(*argumenty):
     lista_wszystkich_komentujacych = []
     wszyscy_aktywni = []
     nazwa_tagu = argumenty[0]
+    lista_id_wpisow_na_tagu = []
     
     print(colors.BOLD + colors.BLUE + "\nPobieranie informacji o NIELUBIANYM tagu " + nazwa_tagu + "..." + colors.END)
     if len(argumenty) == 1 or len(argumenty) == 3:
@@ -497,7 +527,8 @@ def pobranie_aktywnych_nielubiany_tag(*argumenty):
                 data_koncowa = str(datetime.date.today())
                 data_poczatkowa = str(datetime.date.today() - datetime.timedelta(weeks=1))
             
-            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa)
+            lista_id_wpisow_na_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, data_poczatkowa, data_koncowa)    
+            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
             print(colors.GREEN + "\t[+] Pobranie aktywnych (komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + " zakończone!" + colors.END)
             return wszyscy_aktywni
@@ -521,7 +552,6 @@ def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny):
             if zbior_wspolny:
                 zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
             if not zbior_wspolny :
-                print(colors.RED + "\t[!] Brak użytkownika, udzielającego się pod wpisami wybranych LUBIANYCH tagów w określonych okresach" + colors.END)
                 return []
     except:
         print(colors.RED + "[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami pod LUBIANYMI tagami! funkcja ['zbior_wspolny_lubianych_tagow']" + colors.END)
@@ -543,7 +573,6 @@ def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny):
             if zbior_wspolny:
                 zbior_wspolny = set(zbior_wspolny).intersection(temp_tablica)
             if not zbior_wspolny :
-                print(colors.RED + "\t[!] Brak użytkownika, udzielającego się pod wpisami wybranych NIELUBIANYCH tagów w określonych okresach" + colors.END)
                 return []
     except:
         print(colors.RED + "\t[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami pod NIELUBIANYMI tagami! funkcja ['zbior_wspolny_nielubianych_tagow']" + colors.END)
