@@ -158,7 +158,6 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
     nazwa_tagu = argumenty[0]
     flaga_data_w_zakresie = 0
     flaga_data_poza_zakresem = 0
-
     if len(argumenty) == 1 or len(argumenty) == 3:
         try:
             if len(argumenty) == 1:
@@ -174,7 +173,9 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
                 if not len(lista_wpisow):
                     print(colors.GREEN + "\t[+] Pobranie id wpisów pod tagiem " + argumenty[0] + " zakończone" + colors.END)
                     return tablica_id_wpisow
+                indeks = 0
                 for wpis in lista_wpisow:
+                    indeks += 1
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
                         flaga_data_w_zakresie = 1
@@ -185,12 +186,12 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
                         return tablica_id_wpisow
                     if flaga_data_w_zakresie:
                         tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
-                ostatni_wpis_na_pobranej_stronie_tagu = tablica_id_wpisow[-1] 
+                    ostatni_wpis_na_pobranej_stronie_tagu = wpis.find('div').attrs.get('data-id')
                 surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/"  + nazwa_tagu + "/next/entry-" + ostatni_wpis_na_pobranej_stronie_tagu + "/")            
         except:
             print(colors.RED + "\t[!] Błąd pobrania id wpisów pod tagiem " + argumenty[0] + "! [funkcja 'pobranie_id_wpisow_na_tagu']" + colors.END)
+            print(tablica_id_wpisow)
             return -1
-    
     else:
         print(colors.RED + "\t[!] Niewłaściwa liczba argumentów [funkcja 'pobranie_id_wpisow_na_tagu']" + colors.END)
         return -1
@@ -302,7 +303,6 @@ def pobranie_komentujacych_tag(*argumenty):
     lista_id_postow_tagu = []
     nazwa_tagu = argumenty[0]
     lista_id_postow_uzytkownika = []
-    print(len(argumenty))
     if len(argumenty) == 2 or len(argumenty) == 4 :
         if len(argumenty) == 2:
             data_koncowa = datetime.date.today()
@@ -459,7 +459,6 @@ def zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow):
 
 def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny):
     temp_tablica = []
-    print(tablica_nielubianych_uzytkownikow)
     try:
         for uzytkownik in tablica_nielubianych_uzytkownikow:
             if len(uzytkownik.split()) == 1:
@@ -516,29 +515,28 @@ def pobranie_aktywnych_nielubiany_tag(*argumenty):
     wszyscy_aktywni = []
     nazwa_tagu = argumenty[0]
     lista_id_wpisow_na_tagu = []
-    
+
     print(colors.BOLD + colors.BLUE + "\nPobieranie informacji o NIELUBIANYM tagu " + nazwa_tagu + "..." + colors.END)
     if len(argumenty) == 1 or len(argumenty) == 3:
-        try:        
+        try:       
             if len(argumenty) == 3:
                 data_poczatkowa = argumenty[1]
                 data_koncowa = argumenty[2]
             else:
                 data_koncowa = str(datetime.date.today())
                 data_poczatkowa = str(datetime.date.today() - datetime.timedelta(weeks=1))
-            
+
             lista_id_wpisow_na_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, data_poczatkowa, data_koncowa)    
-            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)
+            lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)    
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
-            print(colors.GREEN + "\t[+] Pobranie aktywnych (komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + " zakończone!" + colors.END)
+            print(colors. GREEN + "\t[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + " zakończone!" + colors.END)
             return wszyscy_aktywni
         except:
-            print(colors.RED + "\t[!] Błąd pobrania aktywnych (komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_nielubiany_tag']" + colors.END)
+            print(colors.RED + "\t[!] Błąd pobrania aktywnych (plusujących i komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_nielubiany_tag']" + colors.END)
             return -1
     else:
-        print(colors.RED + "\t[!] Nieprawidłowa liczba argumentów! [funkcja 'pobranie_aktywnych_nielubianych_tag']") + colors.END
+        print(colors.RED + "\t[!] Nieprawidłowa liczba argumentów! [funkcja 'pobranie_aktywnych_nielubianych_tag']" + colors.END)
         return -1
-
 
 def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny):
     temp_tablica = []
