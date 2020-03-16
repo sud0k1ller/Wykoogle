@@ -167,14 +167,17 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
                 data_poczatkowa = date.fromisoformat(argumenty[1])
                 data_koncowa = date.fromisoformat(argumenty[2])
             surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu)
+            spinner_postepu = PieSpinner(colors.GREEN + '\t[#] Pobieranie id wpisów na tagu w wybranym zakresie ' + colors.END)
             while not flaga_data_poza_zakresem:    
                 soup = bs(surowe_dane_strony.text, "lxml")
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
+                spinner_postepu.next()
                 if not len(lista_wpisow):
-                    print(colors.GREEN + "\t[+] Pobranie id wpisów pod tagiem " + argumenty[0] + " zakończone" + colors.END)
+                    print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO" + colors.END)
                     return tablica_id_wpisow
                 indeks = 0
                 for wpis in lista_wpisow:
+                    spinner_postepu.next()
                     indeks += 1
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
@@ -182,7 +185,7 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
                     if flaga_data_w_zakresie and (data_wpisu < data_poczatkowa):
                         flaga_data_w_zakresie = 0
                         flaga_data_poza_zakresem = 1 
-                        print(colors.GREEN + "\t[+] Pobranie id wpisów pod tagiem " + argumenty[0] + " zakończone" + colors.END)
+                        print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO" + colors.END)
                         return tablica_id_wpisow
                     if flaga_data_w_zakresie:
                         tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
@@ -302,20 +305,22 @@ def pobranie_komentujacych_tag(*argumenty):
     lista_komentujacych_tag = []
     lista_id_postow_tagu = []
     nazwa_tagu = argumenty[0]
-    lista_id_postow_uzytkownika = []
+    lista_id_postow_na_tagu = []
     if len(argumenty) == 2 or len(argumenty) == 4 :
         if len(argumenty) == 2:
             data_koncowa = datetime.date.today()
             data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
-            lista_id_postow_uzytkownika = argumenty[2]
+            lista_id_postow_na_tagu = argumenty[2]
         else:
             data_poczatkowa = date.fromisoformat(argumenty[1])
             data_koncowa = date.fromisoformat(argumenty[2])
-            lista_id_postow_uzytkownika = argumenty[3]
+            lista_id_postow_na_tagu = argumenty[3]
         try:
-            for id_wpisu in lista_id_postow_tagu:
+            pasek_postepu = ShadyBar(colors.GREEN + '\t[#] Pobieranie wszystkich komentujących wpisy pod tagiem w wybranym zakresie\t' + colors.END, max=len(lista_id_postow_na_tagu), suffix='%(percent)d%%')
+            for id_wpisu in lista_id_postow_na_tagu:
                 lista_komentujacych_tag += pobranie_komentujacych_wpis(id_wpisu)
-            print(colors.GREEN + "\t[+] Pobranie komentujących wpisy pod tagiem " + argumenty[0] + " zakończone!" + colors.END)
+                pasek_postepu.next()
+            print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
             return lista_komentujacych_tag
         except:
             print(colors.RED + "\t[!] Błąd pobrania komentujących wpisy pod tagiem " + argumenty[0] + "! [funkcja 'pobranie_komentujacych_tag']" + colors.END)
@@ -329,20 +334,22 @@ def pobranie_plusujacych_tag(*argumenty):
     lista_plusujacych_tag = []
     lista_id_postow_tagu = []
     nazwa_tagu = argumenty[0]
-    lista_id_postow_uzytkownika = []
+    lista_id_postow_na_tagu = []
     if len(argumenty) == 2 or len(argumenty) == 4 :
         if len(argumenty) == 2:
             data_koncowa = datetime.date.today()
             data_poczatkowa = datetime.date.today() - datetime.timedelta(weeks=1)
-            lista_id_postow_uzytkownika = argumenty[2]
+            lista_id_postow_na_tagu = argumenty[2]
         else:
             data_poczatkowa = date.fromisoformat(argumenty[1])
             data_koncowa = date.fromisoformat(argumenty[2])
-            lista_id_postow_uzytkownika = argumenty[3]
+            lista_id_postow_na_tagu = argumenty[3]
         try:
-            for id_wpisu in lista_id_postow_tagu:
+            pasek_postepu = ShadyBar(colors.GREEN + '\t[#] Pobieranie wszystkich plusujących wpisy pod tagiem w wybranym zakresie\t' + colors.END, max=len(lista_id_postow_na_tagu), suffix='%(percent)d%%')
+            for id_wpisu in lista_id_postow_na_tagu:
                 lista_plusujacych_tag += pobranie_plusujacych_wpis(id_wpisu)
-            print(colors.GREEN + "\t[+] Pobranie plusujących wpisy pod tagiem " + argumenty[0] + " zakończone!" + colors.END)
+                pasek_postepu.next()
+            print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
             return lista_plusujacych_tag
         except:
             print(colors.RED + "\t[!] Błąd pobrania plusujących wpisy pod tagiem " + argumenty[0] + "! [funkcja 'pobranie_plusujacych_tag']" + colors.END)
@@ -500,7 +507,7 @@ def pobranie_aktywnych_lubiany_tag(*argumenty):
             lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)    
             lista_wszystkich_plusujacych = pobranie_plusujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)   
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
-            print(colors. GREEN + "\t[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami pod LUBIANYM tagiem " + argumenty[0] + " zakończone!" + colors.END)
+            print(colors.GREEN + "\n\t[+] Zakończono pobieranie informacji o tagu " + argumenty[0] + "!" + colors.END)
             return wszyscy_aktywni
         except:
             print(colors.RED + "\t[!] Błąd pobrania aktywnych (plusujących i komentujących) pod wpisami pod LUBIANYM tagiem " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_lubiany_tag']" + colors.END)
@@ -529,7 +536,7 @@ def pobranie_aktywnych_nielubiany_tag(*argumenty):
             lista_id_wpisow_na_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, data_poczatkowa, data_koncowa)    
             lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)    
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_komentujacych))
-            print(colors. GREEN + "\t[+] Pobranie aktywnych (plusujących i komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + " zakończone!" + colors.END)
+            print(colors.GREEN + "\n\t[+] Zakończono pobieranie informacji o tagu " + argumenty[0] + "!" + colors.END)
             return wszyscy_aktywni
         except:
             print(colors.RED + "\t[!] Błąd pobrania aktywnych (plusujących i komentujących) pod wpisami pod NIELUBIANYM tagiem " + argumenty[0] + "! [funkcja 'pobranie_aktywnych_nielubiany_tag']" + colors.END)
