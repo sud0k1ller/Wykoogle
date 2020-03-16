@@ -663,6 +663,10 @@ def wyswietl_informacje_koncowe(zbior_wspolny):
 
 def wygeneruj_zbior_wspolny(zbior_wspolny):
 
+    if not tablica_lubianych_uzytkownikow and not tablica_lubianych_tagow and not tablica_nielubianych_uzytkownikow and not tablica_nielubianych_tagow: 
+        print(colors.RED + colors.BOLD + "README byś chociaż przeczytał.\n\n" + colors.END)
+        return -1
+
     # Wybierz zbiór wspólny dla lubianych użytkowników
     if tablica_lubianych_uzytkownikow:
         zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
@@ -722,5 +726,6 @@ wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablic
 zbior_wspolny = wygeneruj_zbior_wspolny(zbior_wspolny)
 
 # Wyświetl informacje o otrzymanym zbiorze wspólnym
-wyswietl_informacje_koncowe(zbior_wspolny)
+if zbior_wspolny != -1:
+    wyswietl_informacje_koncowe(zbior_wspolny)
 
