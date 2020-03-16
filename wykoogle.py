@@ -11,7 +11,7 @@ from progress.spinner import PieSpinner
 
 class colors:
     BLUE = '\033[34m'
-    GREEN = '\033[92m'
+    GREEN = '\033[32m'
     RED = '\033[31m'
     YELLOW = '\033[33m'
     END = '\033[0m'
@@ -166,7 +166,8 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
             else:
                 data_poczatkowa = date.fromisoformat(argumenty[1])
                 data_koncowa = date.fromisoformat(argumenty[2])
-            surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu)
+            
+            surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu + '/wszystkie')
             spinner_postepu = PieSpinner(colors.GREEN + '\t[#] Pobieranie id wpisów na tagu w wybranym zakresie ' + colors.END)
             while not flaga_data_poza_zakresem:    
                 soup = bs(surowe_dane_strony.text, "lxml")
@@ -175,10 +176,8 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
                 if not len(lista_wpisow):
                     print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO" + colors.END)
                     return tablica_id_wpisow
-                indeks = 0
                 for wpis in lista_wpisow:
                     spinner_postepu.next()
-                    indeks += 1
                     data_wpisu = date.fromisoformat(wpis.find('time').attrs.get('title').split()[0])
                     if not flaga_data_w_zakresie and (data_wpisu <= data_koncowa):
                         flaga_data_w_zakresie = 1
@@ -189,11 +188,10 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
                         return tablica_id_wpisow
                     if flaga_data_w_zakresie:
                         tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))
-                    ostatni_wpis_na_pobranej_stronie_tagu = wpis.find('div').attrs.get('data-id')
+                        ostatni_wpis_na_pobranej_stronie_tagu = wpis.find('div').attrs.get('data-id')
                 surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/"  + nazwa_tagu + "/next/entry-" + ostatni_wpis_na_pobranej_stronie_tagu + "/")            
         except:
             print(colors.RED + "\t[!] Błąd pobrania id wpisów pod tagiem " + argumenty[0] + "! [funkcja 'pobranie_id_wpisow_na_tagu']" + colors.END)
-            print(tablica_id_wpisow)
             return -1
     else:
         print(colors.RED + "\t[!] Niewłaściwa liczba argumentów [funkcja 'pobranie_id_wpisow_na_tagu']" + colors.END)
@@ -215,10 +213,10 @@ def pobranie_listy_analizowanych_tagow_i_uzytkownikow():
             lubiani_uz_lista.append(lubiany_uz.strip())
         for lubiany_tag in open('lubiane_tagi', 'r'):
             lubiane_tagi_lista.append(lubiany_tag.strip())
-        print("[+] Pobranie listy użytkowników i tagów zakończone!")
+        #print("[+] Pobranie listy użytkowników i tagów zakończone!")
         return nielubiani_uz_lista, nielubiane_tagi_lista, lubiani_uz_lista, lubiane_tagi_lista   
     except:
-        print("[!] Błąd pobrania listy użytkowników i tagów z plików! [funkcja 'pobranie_listy_analizowanych_tagow_i_uzytkownikow']")
+        print(colors.RED + "[!] Błąd pobrania listy użytkowników i tagów z plików! [funkcja 'pobranie_listy_analizowanych_tagow_i_uzytkownikow']" + colors.END)
         return -1
 
 
@@ -503,7 +501,7 @@ def pobranie_aktywnych_lubiany_tag(*argumenty):
                 data_koncowa = str(datetime.date.today())
                 data_poczatkowa = str(datetime.date.today() - datetime.timedelta(weeks=1))
 
-            lista_id_wpisow_na_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, data_poczatkowa, data_koncowa)    
+            lista_id_wpisow_na_tagu = pobranie_id_wpisow_na_tagu(nazwa_tagu, data_poczatkowa, data_koncowa)
             lista_wszystkich_komentujacych = pobranie_komentujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)    
             lista_wszystkich_plusujacych = pobranie_plusujacych_tag(nazwa_tagu, data_poczatkowa, data_koncowa, lista_id_wpisow_na_tagu)   
             wszyscy_aktywni = list(dict.fromkeys(lista_wszystkich_plusujacych + lista_wszystkich_komentujacych))
@@ -639,41 +637,77 @@ def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, ta
 
 def wyswietl_informacje_koncowe(zbior_wspolny):
 
-    if zbior_wspolny:
-        print("Podczas analizy wybranych użytkowników i tagów wytypowano następujące osoby:")
-        for uzytkownik, indeks in zbior_wspolny, range(len(zbior_wspolny)):
-            print("\t\t" + str(indeks) + ") " + uzytkownik)
-        return 0
+    if zbior_wspolny and zbior_wspolny != -1:
+        if len(zbior_wspolny) > 20:
+            print(colors.GREEN + "\nWytypowano ponad 20 osób [" + str(len(zbior_wspolny)) + "] czy chcesz wyświetlić wszystkie?: [t/N]" + colors.END)
+            odpowiedz = input()
+            if odpowiedz == 't':
+                print(colors.GREEN + colors.BOLD + "\nPodczas analizy wybranych użytkowników i tagów wytypowano następujące osoby [" + str(len(zbior_wspolny)) + "]:" + colors.END)
+                indeks = 1
+                for uzytkownik in zbior_wspolny:
+                    print(colors.BLUE + colors.BOLD + "\t\t" + str(indeks) + ") " + uzytkownik + colors.END)
+                    indeks += 1
+            else:
+                print(colors.YELLOW + "Zmień kryteria, aby zmniejszyć liczbę wytypowanych użytkowników i uruchom program ponownie")
+                return 0
+        else:
+            print(colors.GREEN + colors.BOLD + "\nPodczas analizy wybranych użytkowników i tagów wytypowano następujące osoby [" + str(len(zbior_wspolny)) + "]:" + colors.END)
+            indeks = 1
+            for uzytkownik in zbior_wspolny:
+                print(colors.BLUE + colors.BOLD + "\t\t" + str(indeks) + ") " + uzytkownik + colors.END)
+                indeks += 1
+                return 0
     else:
-        print(colors.BOLD + colors.YELLOW + "Podczas analizy nie udało się znaleźć osób pasujących do wybranych kryteriów. Spróbuj poszerzyć zakres dat lub zmienić analizowane tagi i użytkowników\n" + colors.END)
+        print(colors.YELLOW + colors.BOLD + "\nPodczas analizy nie udało się znaleźć osób pasujących do wybranych kryteriów. Spróbuj poszerzyć zakres dat lub zmienić analizowane tagi i użytkowników\n" + colors.END)
         return -1
 
 def wygeneruj_zbior_wspolny(zbior_wspolny):
 
     # Wybierz zbiór wspólny dla lubianych użytkowników
-    zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
-    if not zbior_wspolny:
-        print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom." + colors.END)
-        #return -1    
-    
+    if tablica_lubianych_uzytkownikow:
+        zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
+        if not zbior_wspolny:
+            print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
+            return -1    
+        else:
+            print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
+    else:
+        print(colors.YELLOW + "\nNie wybrano żadnych lubianych użytkowników - POMIJAM" + colors.END)
+
     # Zmodyfikuj zbiór wspólny uwzględniając nielubianych użytkowników
-    zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
-    if not zbior_wspolny:
-        print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom." + colors.END)
-        #return -1    
+    if tablica_nielubianych_uzytkownikow:
+        zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
+        if not zbior_wspolny:
+            print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
+            return -1    
+        else:
+            print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
+    else:
+        print(colors.YELLOW + "\nNie wybrano żadnych nielubianych użytkowników - POMIJAM" + colors.END)
     
     # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
-    zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
-    if not zbior_wspolny:
-        print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom." + colors.END)
-        #return -1    
     
+    if tablica_lubianych_tagow:
+        zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
+        if not zbior_wspolny:
+            print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom. - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
+            return -1    
+        else:
+            print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
+    else:
+        print(colors.YELLOW + "\nNie wybrano żadnych lubianych tagów - POMIJAM" + colors.END)
+        
     # Zmodyfikuj zbiór wspólny uwzględniając nielubianye tagów
-    zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
-    if not zbior_wspolny:
-        print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom." + colors.END)
-        #return -1    
-
+    if tablica_nielubianych_tagow:
+        zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
+        if not zbior_wspolny:
+            print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom. - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
+            return -1    
+        else:
+            print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
+    else:
+        print(colors.YELLOW + "\nNie wybrano żadnych nielubianych tagów - POMIJAM" + colors.END)
+    
     return zbior_wspolny
 
 #===== MAIN =====
