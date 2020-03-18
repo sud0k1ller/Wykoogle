@@ -2,7 +2,6 @@
 
 import re
 import requests
-from lxml import html
 from bs4 import BeautifulSoup as bs
 import datetime
 from datetime import date
@@ -20,9 +19,11 @@ class colors:
 
 def plusujacy_wpis_surowe_dane(id_wpisu):
     try:
-        url_json_plusujacy_wpis = "https://www.wykop.pl/ajax2/wpis/upvoters/" + str(id_wpisu)    
-        surowe_dane_string  = requests.get(url_json_plusujacy_wpis)
-        #print("\t\t[+] Pobranie surowych danych o plusujących wpis " + str(id_wpisu) + " zakończone!")
+        surowe_dane_string  = requests.get("https://www.wykop.pl/ajax2/wpis/upvoters/" + str(id_wpisu)) 
+        soup = bs(surowe_dane_string.text, "lxml")
+        if soup.find("div", {"class":"mark-bg space error-block"}):
+            print("\t\t[!] Błąd 404 dla strony: " + "https://www.wykop.pl/ajax2/wpis/upvoters/" + str(id_wpisu) + "\n\t\t Sprawdź poprawność URL. Zła nazwa użytkownika?")
+            return -1
         return surowe_dane_string.text
     except:
         print(colors.RED + "\t\t[!] Błąd pobierania surowych danych o plusujących wpis " + str(id_wpisu) + "! [funkcja 'plusujacy_wpis_surowe_dane']" + colors.END)
@@ -105,6 +106,10 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
             for strona in range(numer_strony, liczba_stron_do_analizy + 1):
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(strona))  
                 soup = bs(surowe_dane_strony.text, "lxml")
+                if soup.find("div", {"class":"mark-bg space error-block"}):
+                    print(colors.RED + "\n\t\t[!] Błąd 404 dla strony: " + "https://www.wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(strona) + "\n\t\t Sprawdź poprawność URL. Zła nazwa użytkownika?" + colors.END)
+                    return -1
+
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 for wpis in lista_wpisow:
                     tablica_id_wpisow.append(wpis.find('div').attrs.get('data-id'))    
@@ -128,6 +133,10 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
                 surowe_dane_strony = requests.get("https://wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(numer_strony))  
                 numer_strony += 1
                 soup = bs(surowe_dane_strony.text, "lxml")
+                if soup.find("div", {"class":"mark-bg space error-block"}):
+                    print(colors.RED + "\n\t\t[!] Błąd 404 dla strony: " + "https://www.wykop.pl/ludzie/wpisy/" + nazwa_uzytkownika + "/strona/" + str(strona) + "\n\t\t Sprawdź poprawność URL. Zła nazwa użytkownika?" + colors.END)
+                    return -1
+
                 lista_wpisow = soup.find_all('li', {'class': 'entry iC'})
                 if not len(lista_wpisow):
                     print(colors.GREEN + "\n\t\t[+] ZAKOŃCZONO!" + colors.END)
@@ -458,6 +467,10 @@ def zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow):
         print(colors.RED + "\t[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami LUBIANYCH użytkowników! funkcja ['zbior_wspolny_lubianych_uz']" + colors.END)
         return -1
     
+    if zbior_wspolny == -1:
+        print(colors.RED + colors.BOLD + "\nBŁĄD UTWORZENIA ZBIORU WSPÓLNEGO" + colors.END)
+        return zbior_wspolny
+
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami LUBIANYCH użytkowników!" + colors.END)
     return zbior_wspolny    
 
@@ -479,7 +492,11 @@ def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspol
     except:
         print(colors.RED + "\t[!] Błąd tworzenia zbioru wspólnego udzielających się pod wpisami NIELUBIANYCH użytkowników! funkcja ['zbior_wspolny_nielubianych_uz']" + colors.END)
         return -1
-         
+    
+    if zbior_wspolny == -1:
+        print(colors.RED + colors.BOLD + "\nBŁĄD UTWORZENIA ZBIORU WSPÓLNEGO" + colors.END)
+        return zbior_wspolny
+     
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami NIELUBIANYCH użytkowników!" + colors.END)
     return zbior_wspolny    
 
@@ -670,6 +687,8 @@ def wygeneruj_zbior_wspolny(zbior_wspolny):
     # Wybierz zbiór wspólny dla lubianych użytkowników
     if tablica_lubianych_uzytkownikow:
         zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
+        if zbior_wspolny == -1:
+            zbior_wspolny = []
         if not zbior_wspolny:
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
@@ -681,7 +700,9 @@ def wygeneruj_zbior_wspolny(zbior_wspolny):
     # Zmodyfikuj zbiór wspólny uwzględniając nielubianych użytkowników
     if tablica_nielubianych_uzytkownikow:
         zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
-        if not zbior_wspolny:
+        if zbior_wspolny == -1:
+            zbior_wspolny = []
+        if not zbior_wspolny: 
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
         else:
@@ -690,7 +711,6 @@ def wygeneruj_zbior_wspolny(zbior_wspolny):
         print(colors.YELLOW + "\nNie wybrano żadnych nielubianych użytkowników - POMIJAM" + colors.END)
     
     # Zmodyfikuj zbiór wspólny uwzględniając lubiane tagi
-    
     if tablica_lubianych_tagow:
         zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
         if not zbior_wspolny:
