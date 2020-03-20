@@ -7,6 +7,7 @@ import datetime
 from datetime import date
 from progress.bar import ShadyBar
 from progress.spinner import PieSpinner
+from tabulate import tabulate
 
 class colors:
     BLUE = '\033[34m'
@@ -524,8 +525,11 @@ def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, dotychczaso
             return -1
 
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami NIELUBIANYCH użytkowników!" + colors.END)
-    return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
-
+    if dotychczasowy_zbior_wspolny:
+        return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
+    else:
+        return zbior_wspolny
+    
 def pobranie_aktywnych_lubiany_tag(*argumenty):
     lista_wszystkich_komentujacych = []
     lista_wszystkich_plusujacych = []
@@ -618,8 +622,10 @@ def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, dotychczasowy_zbior_w
             return -1
 
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami LUBIANYCH tagów!" + colors.END)
-    return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
-
+    if dotychczasowy_zbior_wspolny:
+        return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
+    else:
+        return zbior_wspolny
 
 def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, dotychczasowy_zbior_wspolny):
     temp_tablica = []
@@ -655,11 +661,14 @@ def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, dotychczasowy_z
             return -1
 
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami NIELUBIANYCH tagów!" + colors.END)
-    return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
+    if dotychczasowy_zbior_wspolny:
+        return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
+    else:
+        return zbior_wspolny
 
 
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
- 
+
     if len(tablica_lubianych_uzytkownikow):
         print("\nWybrano " + str(len(tablica_lubianych_uzytkownikow)) + " lubianych użytkowników:")
         for uzytkownik in tablica_lubianych_uzytkownikow:
@@ -772,7 +781,7 @@ def wygeneruj_zbior_wspolny(zbior_wspolny):
         temp_zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
         if temp_zbior_wspolny == -1:
             print(colors.RED + colors.BOLD + "\nZbiór wspólny niewygenerowany z powodu błędów - ignoruję wpisy LUBIANYCH tagów" + colors.END)
-        if not zbior_wspolny:
+        if not temp_zbior_wspolny:
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom. - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
         if temp_zbior_wspolny != -1:
@@ -785,7 +794,7 @@ def wygeneruj_zbior_wspolny(zbior_wspolny):
         temp_zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
         if temp_zbior_wspolny == -1:
             print(colors.RED + colors.BOLD + "\nZbiór wspólny niewygenerowany z powodu błędów - ignoruję wpisy NIELUBIANYCH tagów" + colors.END)
-        if not zbior_wspolny:
+        if not temp_zbior_wspolny:
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom. - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
         if temp_zbior_wspolny != -1:
