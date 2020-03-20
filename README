@@ -40,6 +40,6 @@ Dobrej zabawy!                                                                  
 
 [!] Do plików "lubiane_tagi" oraz "nielubiane_tagi" można dodać tag na 2 różne sposoby:
     <nazwa_tagu><spacja><data_poczatkowa><spacja><data_koncowa><koniec_linii>           # Analizowane są wpisy na tagu z podanego okresu.
-    <nazwa_tagu><koniec_linii>                                                          # Analizowane są wpisy na tago z ostatniego tygodnia
+    <nazwa_tagu><koniec_linii>                                                          # Analizowane są wpisy na tagu z ostatniego tygodnia
 
 Tylko tyle. Powinno zadziałać.
