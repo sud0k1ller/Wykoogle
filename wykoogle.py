@@ -120,6 +120,13 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     if len(argumenty) == 3:
         data_poczatkowa = date.fromisoformat(argumenty[1])
         data_koncowa = date.fromisoformat(argumenty[2])
+        if data_poczatkowa > datetime.date.today():
+            print(colors.YELLOW + "\t[!] Data początkowa z przyszłości. Ignoruję tag" + colors.END)
+            return -1                    
+        if data_koncowa > datetime.date.today():
+            print(colors.YELLOW + "\t[!] Data końcowa z przyszłości. Ignoruję tag" + colors.END)
+            return -1
+
         if data_poczatkowa > data_koncowa:
             print(colors.YELLOW + "\t[!] Nieprawidłowa kolejność dat - poprawiam zakres" + colors.YELLOW)
             data_poczatkowa = date.fromisoformat(argumenty[2])
@@ -177,6 +184,12 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
             else:
                 data_poczatkowa = date.fromisoformat(argumenty[1])
                 data_koncowa = date.fromisoformat(argumenty[2])
+                if data_poczatkowa > datetime.date.today():
+                    print(colors.YELLOW + "\t[!] Data początkowa z przyszłości. Ignoruję tag" + colors.END)
+                    return -1                    
+                if data_koncowa > datetime.date.today():
+                    print(colors.YELLOW + "\t[!] Data końcowa z przyszłości. Ignoruję tag" + colors.END)
+                    return -1
                 if data_poczatkowa > data_koncowa:
                     print(colors.YELLOW + "\t[!] Nieprawidłowa kolejność dat - poprawiam zakres" + colors.YELLOW)
                     data_poczatkowa = date.fromisoformat(argumenty[2])
