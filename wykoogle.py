@@ -239,20 +239,31 @@ def pobranie_listy_analizowanych_tagow_i_uzytkownikow():
         for nielubiany_uz in open('nielubiani_uzytkownicy', 'r'):
             if nielubiany_uz.strip():
                 nielubiani_uz_lista.append(nielubiany_uz.strip())
+    except OSError:
+        print(colors.RED + colors.BOLD + "[!] Błąd otwarcia pliku: nielubiani_uzytkownicy. Plik nie istnieje?"  + colors.END)
+
+    try:
         for nielubiany_tag in open('nielubiane_tagi', 'r'):
             if nielubiany_tag.strip():
                 nielubiane_tagi_lista.append(nielubiany_tag.strip())
+    except OSError:    
+        print(colors.RED + colors.BOLD + "[!] Błąd otwarcia pliku: nielubianie_tagi. Plik nie istnieje?"  + colors.END)
+    
+    try:    
         for lubiany_uz in open('lubiani_uzytkownicy', 'r'):
             if lubiany_uz.strip():    
                 lubiani_uz_lista.append(lubiany_uz.strip())
-        for lubiany_tag in open('lubiane_tagi', 'r'):
+    except OSError:
+        print(colors.RED + colors.BOLD + "[!] Błąd otwarcia pliku: lubiani_uzytkownicy. Plik nie istnieje?"  + colors.END)
+   
+    try:
+         for lubiany_tag in open('lubiane_tagi', 'r'):
             if lubiany_tag.strip():
                 lubiane_tagi_lista.append(lubiany_tag.strip())
-        #print("[+] Pobranie listy użytkowników i tagów zakończone!")
-        return nielubiani_uz_lista, nielubiane_tagi_lista, lubiani_uz_lista, lubiane_tagi_lista   
-    except:
-        print(colors.RED + "[!] Błąd pobrania listy użytkowników i tagów z plików! [funkcja 'pobranie_listy_analizowanych_tagow_i_uzytkownikow']" + colors.END)
-        return -1
+    except OSError:
+        print(colors.RED + colors.BOLD + "[!] Błąd otwarcia pliku: lubiane_tagi. Plik nie istnieje?"  + colors.END)
+     
+    return nielubiani_uz_lista, nielubiane_tagi_lista, lubiani_uz_lista, lubiane_tagi_lista   
 
 
 def pobranie_komentujacych_uzytkownika(*argumenty):
