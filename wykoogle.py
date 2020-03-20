@@ -480,10 +480,10 @@ def zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow):
     return zbior_wspolny    
 
 
-def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny):
+def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, dotychczasowy_zbior_wspolny):
     temp_tablica = []
-    if not zbior_wspolny:
-        flaga_zbior_wspolny_pusty_na_poczatku = 1    
+    zbior_wspolny = []
+    flaga_zbior_wspolny_pusty_na_poczatku = 1    
 
     try:
         for uzytkownik in tablica_nielubianych_uzytkownikow:
@@ -515,7 +515,7 @@ def zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspol
             return -1
 
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami NIELUBIANYCH użytkowników!" + colors.END)
-    return zbior_wspolny 
+    return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
 
 def pobranie_aktywnych_lubiany_tag(*argumenty):
     lista_wszystkich_komentujacych = []
@@ -576,10 +576,10 @@ def pobranie_aktywnych_nielubiany_tag(*argumenty):
         print(colors.RED + "\t[!] Nieprawidłowa liczba argumentów! [funkcja 'pobranie_aktywnych_nielubianych_tag']" + colors.END)
         return -1
 
-def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny):
+def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, dotychczasowy_zbior_wspolny):
     temp_tablica = []
-    if not zbior_wspolny:
-        flaga_zbior_wspolny_pusty_na_poczatku = 1
+    zbior_wspolny = []
+    flaga_zbior_wspolny_pusty_na_poczatku = 1
 
     try:
         for tag in tablica_lubianych_tagow:
@@ -609,12 +609,13 @@ def zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny):
             return -1
 
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami LUBIANYCH tagów!" + colors.END)
-    return zbior_wspolny 
+    return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
 
-def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny):
+
+def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, dotychczasowy_zbior_wspolny):
     temp_tablica = []
-    if not zbior_wspolny:
-        flaga_zbior_wspolny_pusty_na_poczatku = 1
+    zbior_wspolny = []
+    flaga_zbior_wspolny_pusty_na_poczatku = 1
 
     try:
         for tag in tablica_nielubianych_tagow:
@@ -645,7 +646,7 @@ def zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny):
             return -1
 
     print(colors.GREEN + "\t[+] Utworzono zbiór wspólny użytkowników udzielających się pod wpisami NIELUBIANYCH tagów!" + colors.END)
-    return zbior_wspolny 
+    return set(zbior_wspolny).intersection(dotychczasowy_zbior_wspolny)
 
 
 def wyswietl_informacje_o_pobranych_danych(tablica_nielubianych_uzytkownikow, tablica_nielubianych_tagow, tablica_lubianych_uzytkownikow, tablica_lubianych_tagow):
@@ -719,68 +720,67 @@ def wyswietl_informacje_koncowe(zbior_wspolny):
             for uzytkownik in zbior_wspolny:
                 print(colors.BLUE + colors.BOLD + "\t\t" + str(indeks) + ") " + uzytkownik + colors.END)
                 indeks += 1
-                return 0
+            return 0
     else:
         print(colors.YELLOW + colors.BOLD + "\nPodczas analizy nie udało się znaleźć osób pasujących do wybranych kryteriów. Spróbuj poszerzyć zakres dat lub zmienić analizowane tagi i użytkowników\n" + colors.END)
         return -1
 
 def wygeneruj_zbior_wspolny(zbior_wspolny):
 
+    temp_zbior_wspolny = []
+
     if not tablica_lubianych_uzytkownikow and not tablica_lubianych_tagow and not tablica_nielubianych_uzytkownikow and not tablica_nielubianych_tagow: 
         print(colors.RED + colors.BOLD + "README byś chociaż przeczytał.\n\n" + colors.END)
         return -1
 
     if tablica_lubianych_uzytkownikow:
-        zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
-        if zbior_wspolny == -1:
+        temp_zbior_wspolny = zbior_wspolny_lubianych_uz(tablica_lubianych_uzytkownikow)
+        if temp_zbior_wspolny == -1:
             print(colors.RED + colors.BOLD + "\nZbiór wspólny niewygenerowany z powodu błędów - ignoruję wpisy LUBIANYCH użytkowników" + colors.END)
-            return []
-        if not zbior_wspolny:
+        if not temp_zbior_wspolny:
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
-        else:
+        if temp_zbior_wspolny != -1:
+            zbior_wspolny = temp_zbior_wspolny
             print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
     else:
         print(colors.YELLOW + "\nNie wybrano żadnych lubianych użytkowników - POMIJAM" + colors.END)
 
     if tablica_nielubianych_uzytkownikow:
-        zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
-        if zbior_wspolny == -1:
+        temp_zbior_wspolny = zbior_wspolny_nielubianych_uz(tablica_nielubianych_uzytkownikow, zbior_wspolny)
+        if temp_zbior_wspolny == -1:
             print(colors.RED + colors.BOLD + "\nZbiór wspólny niewygenerowany z powodu błędów - ignoruję wpisy NIELUBIANYCH użytkowników" + colors.END)
-            return []
-
-        if not zbior_wspolny: 
+        if not temp_zbior_wspolny: 
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
-        else:
+        if temp_zbior_wspolny != -1:
+            zbior_wspolny = temp_zbior_wspolny
             print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
     else:
         print(colors.YELLOW + "\nNie wybrano żadnych nielubianych użytkowników - POMIJAM" + colors.END)
     
     if tablica_lubianych_tagow:
-        zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
-        if zbior_wspolny == -1:
+        temp_zbior_wspolny = zbior_wspolny_lubianych_tagow(tablica_lubianych_tagow, zbior_wspolny)
+        if temp_zbior_wspolny == -1:
             print(colors.RED + colors.BOLD + "\nZbiór wspólny niewygenerowany z powodu błędów - ignoruję wpisy LUBIANYCH tagów" + colors.END)
-            return []
-
         if not zbior_wspolny:
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom. - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
-        else:
+        if temp_zbior_wspolny != -1:
+            zbior_wspolny = temp_zbior_wspolny
             print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
     else:
         print(colors.YELLOW + "\nNie wybrano żadnych lubianych tagów - POMIJAM" + colors.END)
         
     if tablica_nielubianych_tagow:
-        zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
-        if zbior_wspolny == -1:
+        temp_zbior_wspolny = zbior_wspolny_nielubianych_tagow(tablica_nielubianych_tagow, zbior_wspolny)
+        if temp_zbior_wspolny == -1:
             print(colors.RED + colors.BOLD + "\nZbiór wspólny niewygenerowany z powodu błędów - ignoruję wpisy NIELUBIANYCH tagów" + colors.END)
-            return []
-
         if not zbior_wspolny:
             print(colors.RED + colors.BOLD + "\nBrak użytkowników odpowiadających kryteriom. - ZBIÓR WSPÓLNY JEST PUSTY" + colors.END)
             return -1    
-        else:
+        if temp_zbior_wspolny != -1:
+            zbior_wspolny = temp_zbior_wspolny
             print(colors.GREEN + colors.BOLD + "\nZbiór wspólny zawiera " + str(len(zbior_wspolny)) + " użytkowników" + colors.END)   
     else:
         print(colors.YELLOW + "\nNie wybrano żadnych nielubianych tagów - POMIJAM" + colors.END)
