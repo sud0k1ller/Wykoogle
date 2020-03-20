@@ -1,22 +1,3 @@
-############################################## CZĘŚĆ OPISOWA ############################################################
-                                Nie musisz tego czytać, ale możesz to zrobić.                                           #
-                                                                                                                        #
-Ktoś w pracy mirkuje?                                                                                                   #
-Chcesz robić zapisać na czarną godzinę trochę jego spermiarskich wpisów?                                                #
-Chcesz robić screeny z #wgw Pani z HRu?                                                                                 #
-                                                                                                                        #
-Nie znasz ich nicku - jasne, że nie znasz.                                                                              #
-To teraz może się zmienić.                                                                                              #
-                                                                                                                        #
-Każdy ma wpisy użytkowników i tagi, które lubi - plusuje je i komentuje.                                                #
-Każdy ma wpisy użytkowników i tagi, których nie lubi - nie plusuje ich, ale komentuje, wylewając żale.                  #
-                                                                                                                        #
-Zbiór użytkowników i tagów, pod którymi ktoś jest aktywny może być unikalny dla określonego użytkownika.                #
-Im więcej informacji zbierzemy, tym bardziej prawdopodobne, że skrypt wskaże konkretnego użytkownika.                   #
-Jeśli wskazanie konkretnego użytkownika się nie uda, wyświetlona zostanie lista użytkowników, spełniających kryteria.   #
-Dobrej zabawy!                                                                                                          #
-######################################### KONIEC CZĘŚCI OPISOWEJ ########################################################
-
 [!] Jak używać skryptu?:
         1) Przeczytaj README
         2) Uzupełnij 4 pliki wymagane pliki
@@ -41,5 +22,3 @@ Dobrej zabawy!                                                                  
 [!] Do plików "lubiane_tagi" oraz "nielubiane_tagi" można dodać tag na 2 różne sposoby:
     <nazwa_tagu><spacja><data_poczatkowa><spacja><data_koncowa><koniec_linii>           # Analizowane są wpisy na tagu z podanego okresu.
     <nazwa_tagu><koniec_linii>                                                          # Analizowane są wpisy na tagu z ostatniego tygodnia
-
-Tylko tyle. Powinno zadziałać.
