@@ -224,13 +224,17 @@ def pobranie_listy_analizowanych_tagow_i_uzytkownikow():
 
     try:
         for nielubiany_uz in open('nielubiani_uzytkownicy', 'r'):
-            nielubiani_uz_lista.append(nielubiany_uz.strip())
+            if nielubiany_uz.strip():
+                nielubiani_uz_lista.append(nielubiany_uz.strip())
         for nielubiany_tag in open('nielubiane_tagi', 'r'):
-            nielubiane_tagi_lista.append(nielubiany_tag.strip())
+            if nielubiany_tag.strip():
+                nielubiane_tagi_lista.append(nielubiany_tag.strip())
         for lubiany_uz in open('lubiani_uzytkownicy', 'r'):
-            lubiani_uz_lista.append(lubiany_uz.strip())
+            if lubiany_uz.strip():    
+                lubiani_uz_lista.append(lubiany_uz.strip())
         for lubiany_tag in open('lubiane_tagi', 'r'):
-            lubiane_tagi_lista.append(lubiany_tag.strip())
+            if lubiany_tag.strip():
+                lubiane_tagi_lista.append(lubiany_tag.strip())
         #print("[+] Pobranie listy użytkowników i tagów zakończone!")
         return nielubiani_uz_lista, nielubiane_tagi_lista, lubiani_uz_lista, lubiane_tagi_lista   
     except:
