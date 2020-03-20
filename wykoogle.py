@@ -119,6 +119,11 @@ def pobranie_id_wpisow_uzytkownika(*argumenty):
     if len(argumenty) == 3:
         data_poczatkowa = date.fromisoformat(argumenty[1])
         data_koncowa = date.fromisoformat(argumenty[2])
+        if data_poczatkowa > data_koncowa:
+            print(colors.YELLOW + "\t[!] Nieprawidłowa kolejność dat - poprawiam zakres" + colors.YELLOW)
+            data_poczatkowa = date.fromisoformat(argumenty[2])
+            data_koncowa = date.fromisoformat(argumenty[1])
+
         flaga_data_w_zakresie = 0
         flaga_data_poza_zakresem = 0        
         try:
@@ -171,7 +176,11 @@ def pobranie_id_wpisow_na_tagu(*argumenty):
             else:
                 data_poczatkowa = date.fromisoformat(argumenty[1])
                 data_koncowa = date.fromisoformat(argumenty[2])
-            
+                if data_poczatkowa > data_koncowa:
+                    print(colors.YELLOW + "\t[!] Nieprawidłowa kolejność dat - poprawiam zakres" + colors.YELLOW)
+                    data_poczatkowa = date.fromisoformat(argumenty[2])
+                    data_koncowa = date.fromisoformat(argumenty[1])
+ 
             surowe_dane_strony = requests.get("https://www.wykop.pl/tag/wpisy/" + nazwa_tagu + '/wszystkie')
             spinner_postepu = PieSpinner(colors.GREEN + '\t[#] Pobieranie id wpisów na tagu w wybranym zakresie ' + colors.END)
             while not flaga_data_poza_zakresem:    
